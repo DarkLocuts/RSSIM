@@ -1,0 +1,14 @@
+{{ marker }}
+import { Suspense } from "react";
+import { TableSupervisionComponent } from "@components";
+
+export default function {{ name }}Page() {
+  return (
+    <Suspense>
+      <TableSupervisionComponent
+        title="{{ title }}"
+        {{ properties }}
+      />
+    </Suspense>
+  );
+}
