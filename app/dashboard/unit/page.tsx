@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { HeadbarComponent, TableSupervisionComponent } from "@components";
 import { UnitStatusComponent } from "@app";
+import UnitCategoryCardComponent from "../category/_constructs/UnitCategoryCard.component";
 
 export default function ProductPage() {
   return (
@@ -60,14 +61,6 @@ export default function ProductPage() {
                   validations          :  ["required"]
                 }
               },
-              // {
-              //   construction: {
-              //     name: "name",
-              //     label: "Nama Unit",
-              //     placeholder: "Masukkan nama unit (misal: iPhone 15 Pro #001)",
-              //     validations: ["required", "max:200"]
-              //   }
-              // },
               {
                 construction: {
                   name: "description",
@@ -83,16 +76,14 @@ export default function ProductPage() {
           responsiveControl={{
             mobile: {
               item: (row) => {
-
                 return (
-                  <div className="border bg-white rounded-lg px-4 py-3 flex items-center gap-3 transition-colors w-full">
-                    <div className="flex-grow min-w-0">
-                      <h4 className="text-on-surface font-bold text-base truncate">{row.label || "Unknown Unit"}</h4>
-                      <p className="text-xs text-on-surface-variant mt-0.5 truncate">{row.code || "-"}</p>
-                      <p className="text-xs text-on-surface-variant mt-0.5 truncate"><b>{row.category?.label || "Unknown Category"}</b></p>
-                    </div>
-                    <div className="flex-shrink-0">
+                  <div className="border bg-white rounded-lg w-full">
+                    <div className="w-full flex justify-between items-center px-4 py-2 border-b ">
+                      <div className="text-sm font-semibold">#{row.code}</div>
                       <UnitStatusComponent status={row.status || "UNAVAILABLE"} />
+                    </div>
+                    <div className="px-4 py-4">
+                      <UnitCategoryCardComponent data={row.unit_category} />
                     </div>
                   </div>
                 );

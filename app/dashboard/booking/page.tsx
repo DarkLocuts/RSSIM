@@ -1,19 +1,13 @@
 "use client"
 
 import { Suspense, useState } from "react";
-import { 
-  HeadbarComponent, 
-  IconButtonComponent, 
-  TableSupervisionComponent, 
-  ModalConfirmComponent, 
-  BottomSheetComponent, 
-  ButtonComponent, 
-  InputComponent,
-  ToastComponent
-} from "@components";
+import { HeadbarComponent, IconButtonComponent, TableSupervisionComponent, ModalConfirmComponent, BottomSheetComponent, ButtonComponent, InputComponent, ToastComponent } from "@components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarCheck, faLink, faCopy } from "@fortawesome/free-solid-svg-icons";
 import { UnitListSelectorComponent } from "./_constructs/UnitListSelector.construct";
+import { faCalendar, faCopy, faLink, faMoneyBill, faUser } from "@fortawesome/free-solid-svg-icons";
+import { BookingStatusComponent } from "./_constructs/booking-status.construct";
+import { conversion, api } from "@/utils";
+import Link from "next/link";
 
 export default function BookingPage() {
   const [showModal, setShowModal] = useState(false);
@@ -24,21 +18,29 @@ export default function BookingPage() {
 
   const handleCreateLink = async () => {
     setLoadingLink(true);
-    // Dummy delay to simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const res = await api({
+      path: "bookings",
+      method: "POST",
+      payload: {
+        type: "LINK"
+      }
+    });
+
+    if (res?.status === 200 || res?.status === 201) {
+      const code: string = res?.data?.code || res?.data?.data?.code;
+      
+      if (code) {
+        const link = `${window.location.origin}/booking/${code}`;
+        setCreatedLink(link);
+        setShowModal(false);
+        setTimeout(() => {
+          setShowSheet(true);
+        }, 200);
+      }
+    }
     
-    // Generate dummy booking number
-    const number = "BKG-" + Math.floor(10000 + Math.random() * 90000);
-    const link = `${window.location.origin}/booking/${number}`;
-    
-    setCreatedLink(link);
     setLoadingLink(false);
-    setShowModal(false);
-    
-    // Slight delay to ensure modal close animation runs smoothly
-    setTimeout(() => {
-      setShowSheet(true);
-    }, 200);
   };
 
   return (
@@ -106,7 +108,7 @@ export default function BookingPage() {
                 col: 6,
                 construction: {
                   type         :  "datetime-local",
-                  name         :  "start_date",
+                  name         :  "start_at",
                   label        :  "Tanggal Mulai",
                   placeholder  :  "Pilih tanggal mulai",
                   validations  :  ["required"]
@@ -116,7 +118,7 @@ export default function BookingPage() {
                 col: 6,
                 construction: {
                   type         :  "datetime-local",
-                  name         :  "end_date",
+                  name         :  "end_at",
                   label        :  "Tanggal Selesai",
                   placeholder  :  "Pilih tanggal selesai",
                   validations  :  ["required"]
@@ -145,38 +147,39 @@ export default function BookingPage() {
           responsiveControl={{
             mobile: {
               item: (row) => {
-                const isPaid = Number(row.total_paid || 0) >= Number(row.total_bill || 0);
                 return (
-                  <div className="border bg-white rounded-lg px-4 py-3 flex items-center gap-3 transition-colors w-full">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0">
-                      <FontAwesomeIcon icon={faCalendarCheck} className="text-sm text-[#0050d4]" />
-                    </div>
-                    <div className="flex-grow min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-on-surface font-bold text-base truncate">{row.customer_name || "Unknown"}</h4>
-                        <span className="text-[10px] font-semibold text-[#68788f] bg-gray-100 px-1.5 py-0.5 rounded">
-                          #{row.number || "-"}
-                        </span>
+                  <Link href={`/dashboard/booking/${row.id}`}>
+                    <div className="border bg-white rounded-lg flex items-center gap-2 transition-colors w-full">
+                      <div className="w-full">
+                        <div className="flex items-center justify-between gap-2 mb-2 p-2 border-b">
+                          <span className="text-xs font-semibold text-light-foreground bg-gray-100 px-1.5 py-0.5 rounded">
+                            #{row.number || "-"}
+                          </span>
+                          <BookingStatusComponent status={row.status || "DRAFT"} size="xs" />
+                        </div>
+                        <div className="space-y-1 pb-2">
+                          <div className="flex items-center gap-2 px-2">
+                            <div className="w-7 aspect-square flex items-center justify-center bg-gray-50 rounded-md">
+                              <FontAwesomeIcon icon={faUser} className="text-xs text-foreground" />
+                            </div>
+                            <p className="text-sm text-semibold line-clamp-1">{row.customer_name || "-"} ({row.customer_contact || "-"})</p>
+                          </div>
+                          <div className="flex items-center gap-2 px-2">
+                            <div className="w-7 aspect-square flex items-center justify-center bg-blue-50 rounded-md">
+                              <FontAwesomeIcon icon={faCalendar} className="text-xs text-primary" />
+                            </div>
+                            <p className="text-sm text-semibold line-clamp-1">{row.start_at ? conversion.date(row.start_at) : "-"} s/d {row.end_at ? conversion.date(row.end_at) : "-"}</p>
+                          </div>
+                          <div className="flex items-center gap-2 px-2">
+                            <div className="w-7 aspect-square flex items-center justify-center bg-yellow-50 rounded-md">
+                              <FontAwesomeIcon icon={faMoneyBill} className="text-xs text-warning" />
+                            </div>
+                            <p className="text-sm text-semibold line-clamp-1">Tagihan: {conversion.currency(row.total || 0)} | Dibayar: {conversion.currency(row.total_paid || 0)}</p>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-xs text-on-surface-variant mt-0.5">
-                        {row.start_date || "-"} → {row.end_date || "-"}
-                      </p>
                     </div>
-                    <div className="flex-shrink-0 text-right">
-                      <p className="text-sm font-bold text-[#0050d4]">
-                        Rp {Number(row.total_bill || 0).toLocaleString("id-ID")}
-                      </p>
-                      <span
-                        className="text-[10px] font-semibold px-2 py-0.5 rounded-md"
-                        style={{
-                          backgroundColor: isPaid ? "#69f6b8" : "rgb(248 160 16 / 0.2)",
-                          color: isPaid ? "#005a3c" : "#4a2c00"
-                        }}
-                      >
-                        {isPaid ? "Lunas" : "Belum Lunas"}
-                      </span>
-                    </div>
-                  </div>
+                  </Link>
                 );
               },
             }
@@ -200,11 +203,7 @@ export default function BookingPage() {
           loading: loadingLink,
           onClick: handleCreateLink
         }}
-      >
-        <p className="text-center text-sm text-light-foreground">
-          Apakah Anda yakin ingin membuat pesanan kosong dan menghasilkan link pemesanan?
-        </p>
-      </ModalConfirmComponent>
+      />
 
       <BottomSheetComponent
         show={showSheet}

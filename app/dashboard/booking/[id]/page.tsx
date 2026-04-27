@@ -2,40 +2,35 @@
 
 import { useEffect, useState, use } from "react";
 import { api } from "@utils";
-import {
-  HeadbarComponent,
-  IconButtonComponent,
-} from "@components";
-import { faMoneyBillWave, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { HeadbarComponent } from "@components";
 
 import { BookingDetailSectionComponent } from "./_structures/BookingDetailSection.component";
-import { PaymentListSectionComponent } from "./_constructs/PaymentListSection.construct";
+import { PaymentListSectionComponent } from "./_structures/PaymentListSection.construct";
 import { AddPaymentSheetComponent } from "./_constructs/AddPaymentSheet.construct";
 import { AddPenaltySheetComponent } from "./_constructs/AddPenaltySheet.construct";
+import { BookingActivityLogSectionComponent } from "./_structures/BookingActivityLogSection.construct";
 
 
 export default function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const { id } = resolvedParams;
+  const resolvedParams  =  use(params);
+  const { id }          =  resolvedParams;
 
-  const [booking, setBooking]              = useState<any>(null);
-  const [loading, setLoading]              = useState(true);
-  const [showAddPayment, setShowAddPayment] = useState(false);
-  const [showAddPenalty, setShowAddPenalty]  = useState(false);
+  const [booking, setBooking]                =  useState<any>(null);
+  const [loading, setLoading]                =  useState(true);
+  const [showAddPayment, setShowAddPayment]  =  useState(false);
+  const [showAddPenalty, setShowAddCharge]   =  useState(false);
 
   const fetchBooking = async () => {
     setLoading(true);
     const res = await api({
       path: `bookings/${id}`,
-      params: {
-        expand: ["unit", "unit.unit_category", "payments", "payments.payment_method"],
-      },
     });
 
     if (res?.status === 200) {
       const data = res.data?.data || res.data;
       setBooking(data);
     }
+
     setLoading(false);
   };
 
@@ -43,8 +38,6 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     fetchBooking();
   }, [id]);
 
-
-  // Loading state
   if (loading) {
     return (
       <div className="px-2">
@@ -56,7 +49,6 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  // Not found state
   if (!booking) {
     return (
       <div className="px-2">
@@ -76,33 +68,12 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     <div className="px-2 pb-6">
       <HeadbarComponent title="Detail Pesanan" />
 
-      <div className="flex flex-col gap-4 mt-2">
-        {/* Booking Detail Section */}
-        <BookingDetailSectionComponent booking={booking} />
-
-        {/* Payment List Section */}
-        <PaymentListSectionComponent payments={booking.payments || []} />
+      <div className="flex flex-col gap-2 mt-2">
+        <BookingDetailSectionComponent booking={booking} onRefresh={fetchBooking} />
+        <PaymentListSectionComponent payments={booking.payments || []} booking={booking} onAddCharge={() => setShowAddCharge(true)} onAddPayment={() => setShowAddPayment(true)} />
+        <BookingActivityLogSectionComponent logs={booking.booking_logs || []} />
       </div>
 
-      {/* Floating Action Buttons */}
-      <div className="fixed bottom-40 right-5 flex flex-col gap-3 z-50">
-        <IconButtonComponent
-          icon={faMoneyBillWave}
-          className="w-12 h-12 bg-primary text-white transform active:scale-95 transition-transform shadow-lg shadow-primary/30"
-          size="md"
-          rounded
-          onClick={() => setShowAddPayment(true)}
-        />
-        <IconButtonComponent
-          icon={faExclamationTriangle}
-          className="w-12 h-12 bg-danger text-white transform active:scale-95 transition-transform shadow-lg shadow-red-200"
-          size="md"
-          rounded
-          onClick={() => setShowAddPenalty(true)}
-        />
-      </div>
-
-      {/* Add Payment Bottom Sheet */}
       <AddPaymentSheetComponent
         show={showAddPayment}
         onClose={() => setShowAddPayment(false)}
@@ -110,10 +81,9 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         onSuccess={fetchBooking}
       />
 
-      {/* Add Penalty Bottom Sheet */}
       <AddPenaltySheetComponent
         show={showAddPenalty}
-        onClose={() => setShowAddPenalty(false)}
+        onClose={() => setShowAddCharge(false)}
         bookingId={id}
         onSuccess={fetchBooking}
       />

@@ -1,58 +1,54 @@
 "use client"
 
-import { cn } from "@utils";
+import { useState } from "react";
+import { conversion } from "@utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCalendarAlt,
-  faUser,
-  faPhone,
-  faMobileAlt,
-  faMoneyBillWave,
-  faHashtag,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCalendarAlt, faUser, faPhone, faHashtag, faCamera, faTimes, faEdit, faLink, faCopy } from "@fortawesome/free-solid-svg-icons";
+import { BookingStatusComponent } from "../../_constructs/booking-status.construct";
+import UnitCategoryCardComponent from "@/app/dashboard/category/_constructs/UnitCategoryCard.component";
+import { BottomSheetComponent, ButtonComponent, InputComponent, ToastComponent } from "@/components";
+import { BookingTakeSheet } from "../_constructs/BookingTakeSheet.construct";
+import { BookingCancelSheet } from "../_constructs/BookingCancelSheet.construct";
+import { BookingEditSheet } from "../_constructs/BookingEditSheet.construct";
 
-
-export function BookingDetailSectionComponent({ booking }: { booking: any }) {
-  const totalBill   = Number(booking.total_bill || 0);
-  const totalPaid   = Number(booking.total_paid || 0);
-  const remaining   = Math.max(0, totalBill - totalPaid);
-  const isPaid      = totalPaid >= totalBill && totalBill > 0;
-  const progress    = totalBill > 0 ? Math.min(100, (totalPaid / totalBill) * 100) : 0;
-
-  const statusMap: Record<string, { label: string; bg: string; text: string }> = {
-    draft:     { label: "Draft",     bg: "bg-gray-100",   text: "text-gray-600" },
-    accepted:  { label: "Diterima",  bg: "bg-blue-100",   text: "text-blue-700" },
-    ongoing:   { label: "Berjalan",  bg: "bg-amber-100",  text: "text-amber-700" },
-    completed: { label: "Selesai",   bg: "bg-green-100",  text: "text-green-700" },
-    cancelled: { label: "Dibatalkan", bg: "bg-red-100",   text: "text-red-700" },
-  };
-
-  const status = statusMap[booking.status] || statusMap.draft;
+export function BookingDetailSectionComponent({ booking, onRefresh }: { booking: any, onRefresh?: () => void }) {
+  const [editType, setEditType]                =  useState<"customer" | "unit" | "schedule" | null>(null);
+  const [showCameraSheet, setShowCameraSheet]  =  useState(false);
+  const [showCancelSheet, setShowCancelSheet]  =  useState(false);
+  const [showLinkSheet, setShowLinkSheet]      =  useState(false);
+  const [showLinkToast, setShowLinkToast]      =  useState(false);
 
   return (
-    <div className="bg-white rounded-xl border overflow-hidden shadow-sm">
-      {/* Header with booking number & status */}
-      <div className="px-5 py-4 border-b flex items-center justify-between">
+    <>
+    <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="px-4 py-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
             <FontAwesomeIcon icon={faHashtag} className="text-sm text-primary" />
           </div>
           <div>
             <p className="text-xs text-on-surface-variant">No. Pesanan</p>
-            <p className="font-bold text-on-surface">{booking.number || "-"}</p>
+            <p className="font-bold text-sm text-on-surface">{booking.number || "-"}</p>
           </div>
         </div>
-        <span className={cn("text-xs font-bold px-3 py-1 rounded-full", status.bg, status.text)}>
-          {status.label}
-        </span>
+        <BookingStatusComponent status={booking.status || "DRAFT"} />
       </div>
 
-      <div className="p-5 flex flex-col gap-5">
-        {/* Customer Info */}
-        <div>
-          <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-3">
-            Informasi Pemesan
-          </h3>
+      <div className="py-4 flex flex-col gap-4">
+        <div className="px-4">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+              Informasi Pemesan
+            </h3>
+            <ButtonComponent
+              icon={faEdit}
+              size="xs"
+              rounded
+              variant="outline"
+              onClick={() => setEditType("customer")}
+              label="Ubah Data"
+            />
+          </div>
           <div className="flex flex-col gap-3">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-500">
@@ -75,98 +71,169 @@ export function BookingDetailSectionComponent({ booking }: { booking: any }) {
           </div>
         </div>
 
-        {/* Unit Info */}
-        <div className="border-t pt-4">
-          <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-3">
-            Unit Disewa
-          </h3>
+        <div className="border-t pt-4 px-4">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+              Unit Disewa
+            </h3>
+            <ButtonComponent
+              icon={faEdit}
+              size="xs"
+              rounded
+              variant="outline"
+              onClick={() => setEditType("unit")}
+              label="Ubah Unit"
+            />
+          </div>
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-600">
-              <FontAwesomeIcon icon={faMobileAlt} className="text-xs" />
-            </div>
-            <div>
-              <p className="font-semibold text-on-surface text-sm">
-                {booking.unit?.label || booking.unit?.code || "-"}
-              </p>
-              <p className="text-xs text-on-surface-variant mt-0.5">
-                {booking.unit?.unit_category?.name || "-"}
-              </p>
-            </div>
+            <UnitCategoryCardComponent data={booking.unit?.unit_category || null} />
           </div>
         </div>
 
-        {/* Schedule */}
-        <div className="border-t pt-4">
-          <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-3">
-            Jadwal Sewa
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="border-t pt-4 px-4">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+              Jadwal Sewa
+            </h3>
+            <ButtonComponent
+              icon={faEdit}
+              size="xs"
+              rounded
+              variant="outline"
+              onClick={() => setEditType("schedule")}
+              label="Ubah Jadwal"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 text-green-600">
+              <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center flex-shrink-0 text-cyan-600">
                 <FontAwesomeIcon icon={faCalendarAlt} className="text-xs" />
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Mulai</p>
-                <p className="font-semibold text-on-surface text-sm">{booking.start_date || "-"}</p>
+                <p className="font-semibold text-on-surface text-sm">{booking.start_at ? conversion.date(booking.start_at, "DD-MM-YYYY HH:mm") : "-"}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 text-red-600">
+              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-amber-600">
                 <FontAwesomeIcon icon={faCalendarAlt} className="text-xs" />
               </div>
               <div>
                 <p className="text-xs text-on-surface-variant">Selesai</p>
-                <p className="font-semibold text-on-surface text-sm">{booking.end_date || "-"}</p>
+                <p className="font-semibold text-on-surface text-sm">{booking.end_at ? conversion.date(booking.end_at, "DD-MM-YYYY HH:mm") : "-"}</p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Payment Summary */}
-        <div className="border-t pt-4">
-          <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-3">
-            Ringkasan Pembayaran
-          </h3>
-
-          <div className="bg-gray-50 rounded-lg p-4 flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-on-surface-variant">Total Tagihan</span>
-              <span className="text-sm font-bold text-on-surface">
-                Rp {totalBill.toLocaleString("id-ID")}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-on-surface-variant">Total Dibayar</span>
-              <span className="text-sm font-bold text-green-600">
-                Rp {totalPaid.toLocaleString("id-ID")}
-              </span>
-            </div>
-            <div className="flex items-center justify-between border-t pt-2">
-              <span className="text-sm font-semibold text-on-surface">Sisa Tagihan</span>
-              <span className={cn("text-sm font-bold", isPaid ? "text-green-600" : "text-danger")}>
-                Rp {remaining.toLocaleString("id-ID")}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 mt-2">
-              <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                <FontAwesomeIcon icon={faMoneyBillWave} className="text-gray-500 text-[10px]" />
-              </div>
-              <div className="flex-grow">
-                <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className={cn("h-full transition-all duration-500", isPaid ? "bg-green-500" : "bg-primary")}
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-              <span className={cn("text-[10px] font-bold whitespace-nowrap", isPaid ? "text-green-600" : "text-primary")}>
-                {isPaid ? "LUNAS" : "BELUM LUNAS"}
-              </span>
             </div>
           </div>
         </div>
       </div>
+      <div className="px-4 flex flex-col gap-2 py-4 border-t">
+        {booking.status === "ORDERED" && (
+          <ButtonComponent
+            size="sm"
+            className="w-full py-4"
+            label="Foto Pengambilan"
+            icon={faCamera}
+            onClick={() => setShowCameraSheet(true)}
+            block
+            rounded
+          />
+        )}
+
+        {booking.status === "RENTED" && (
+          <ButtonComponent
+            size="sm"
+            className="w-full py-4"
+            label="Foto Pengembalian"
+            icon={faCamera}
+            onClick={() => setShowCameraSheet(true)}
+            block
+            rounded
+          />
+        )}
+
+        <ButtonComponent
+          size="sm"
+          className="w-full py-4"
+          label="Link Pemesanan"
+          icon={faLink}
+          onClick={() => setShowLinkSheet(true)}
+          block
+          rounded
+          variant="outline"
+        />
+
+        {booking.status !== "CANCELED" && booking.status !== "RENTED" && booking.status !== "RETURNED" && (
+          <ButtonComponent
+            size="sm"
+            className="w-full py-4"
+            label="Batalkan Pesanan"
+            icon={faTimes}
+            variant="outline"
+            paint="danger"
+            onClick={() => setShowCancelSheet(true)}
+            block
+            rounded
+        />
+        )}
+      </div>
+
+      <BookingTakeSheet bookingId={booking.id} show={showCameraSheet} onClose={() => setShowCameraSheet(false)} type={booking.status === "ORDERED" ? "RENTED" : "RETURNED"} />
+      <BookingCancelSheet bookingId={booking.id} show={showCancelSheet} onClose={() => setShowCancelSheet(false)} />
+      <BookingEditSheet 
+        booking={booking} 
+        show={!!editType} 
+        editType={editType}
+        onClose={() => setEditType(null)} 
+        onSuccess={() => {
+          if (onRefresh) onRefresh();
+        }}
+      />
     </div>
+
+    <BottomSheetComponent
+        show={showLinkSheet}
+        onClose={() => setShowLinkSheet(false)}
+        size={320}
+      >
+        <div className="p-6 flex flex-col gap-4">
+          <div className="flex flex-col items-center justify-center gap-2 border-b pb-4 mb-2">
+            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-2">
+              <FontAwesomeIcon icon={faLink} className="text-xl" />
+            </div>
+            <h6 className="font-bold text-lg text-center text-foreground">Link Pemesanan</h6>
+            <p className="text-sm text-center text-light-foreground leading-relaxed">
+              Pesanan kosong berhasil dibuat. Silakan salin link di bawah ini dan bagikan kepada pelanggan.
+            </p>
+          </div>
+          
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold text-light-foreground uppercase">Tautan</span>
+            <div className="flex items-center gap-2">
+              <div className="flex-grow">
+                <InputComponent
+                  value={`${window.location.origin}/booking/${booking.code}`}
+                  readOnly
+                  className="bg-gray-50 text-sm"
+                />
+              </div>
+              <ButtonComponent
+                icon={faCopy}
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/booking/${booking.code}`);
+                  setShowLinkToast(true);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </BottomSheetComponent>
+
+      <ToastComponent
+        show={showLinkToast}
+        onClose={() => setShowLinkToast(false)}
+        title="Link berhasil disalin!"
+        paint="success"
+      />
+    </>
   );
 }

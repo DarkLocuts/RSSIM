@@ -1,6 +1,7 @@
 "use client";
 
 import { api, auth } from "@utils";
+import { usePathname } from "next/navigation";
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from "react";
 
 interface AuthContextInterface {
@@ -15,9 +16,11 @@ interface AuthContextInterface {
 const AuthContext = createContext<AuthContextInterface | undefined>(undefined);
 
 export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const pathname                           =  usePathname();
+  const noAuth                             =  pathname.startsWith("/booking");
   const [accessToken, setAccessToken]      =  useState<string | null>(null);
   const [registerToken, setRegisterToken]  =  useState<string | null>(null);
-  const [user, setUser]                    =  useState<Record<string, any> | null>(null);
+  const [user, setUser]                    =  useState<Record<string  , any> | null>(null);
 
   const set_access_token =  (token: string | null) => {
     setAccessToken(token);
@@ -36,12 +39,14 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
   }
 
   useEffect(() => {
-    const token = auth.getAccessToken() || null;
-    
-    setAccessToken(token)
-
-    fetchUser()
-  }, []);
+    if(!noAuth) {
+      const token = auth.getAccessToken() || null;
+      
+      setAccessToken(token)
+  
+      fetchUser()
+    }
+  }, [noAuth]);
 
   return (
     <AuthContext.Provider value={{

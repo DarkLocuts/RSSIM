@@ -63,11 +63,11 @@ type formCustomConstructionProps = ({
 }) => ReactNode;
 
 type ClusterConstruction = {
-  name    :  string;
-  label   :  string;
-  tip     :  string;
-  fields  :  FormType[];
-  wrap    :  boolean;
+  name            :  string;
+  label           :  string;
+  tip             :  string;
+  fields          :  FormType[];
+  wrap            :  boolean;
 
   /** Use custom class with: "label::", "tip::", "error::", "icon::", "suggest::", "suggest-item::". */
   className  :  string;
@@ -111,7 +111,9 @@ export interface formSupervisionProps {
   footerControl  ?:  ({ loading }: { loading: boolean }) => ReactNode;
   onSuccess      ?:  (data: any) => void;
   onError        ?:  (code: number) => void;
+  successMessage ?:  string;
   className      ?:  string;
+  id             ?:  string;
 }
 
 
@@ -127,6 +129,8 @@ export function FormSupervisionComponent({
   footerControl,
   payload,
   className = "",
+  successMessage,
+  id,
 }: formSupervisionProps) {
   const [modal, setModal]          =  useState<boolean | "success" | "failed">(false);
   const [fresh, setFresh]          =  useState<boolean>(true);
@@ -334,35 +338,43 @@ export function FormSupervisionComponent({
     <>
       {title && <h4 className={cn("text-lg font-semibold mb-4", pcn<CT>(className, "title"))}>{title}</h4>}
 
-      <form className={cn("grid grid-cols-12 gap-4", pcn<CT>(className, "base"))} onSubmit={submit}>
-        {fresh && fields.map((f, i) => renderInput(f, i))}
+      <form id={id} className={cn("flex flex-col h-full")} onSubmit={submit}>
+        <div className={cn("grid grid-cols-12 gap-4 flex-1 content-start", pcn<CT>(className, "base"))}>
+          {fresh && fields.map((f, i) => renderInput(f, i))}
 
-        <div className="hidden md:block col-span-12">
-          {footerControl?.({ loading }) || (
-            <div className="flex justify-end mt-4">
-              <ButtonComponent
-                type="submit"
-                label="Simpan"
-                icon={faSave}
-                loading={loading}
-                className={pcn<CT>(className, "submit")}
-              />
-            </div>
+          <div className="hidden md:block col-span-12">
+            {footerControl?.({ loading }) || (
+              <div className="flex justify-end mt-4">
+                <ButtonComponent
+                  type="submit"
+                  label="Simpan"
+                  icon={faSave}
+                  loading={loading}
+                  className={pcn<CT>(className, "submit")}
+                />
+              </div>
+            )}
+          </div>
+          
+          {footerControl && (
+            <div className="col-span-12">{footerControl?.({ loading })}</div>
           )}
         </div>
 
-        <div className={"md:hidden fixed bottom-0 left-0 w-full p-4 pb-8 bg-white rounded-t-xl z-[55] transition-all duration-300"}>
-          <div className="max-w-md mx-auto flex gap-3">
-            <ButtonComponent
-              type="submit"
-              label="Simpan"
-              loading={loading}
-              rounded
-              block
-              className="py-3 flex-1"
-            />
+        {!footerControl && (
+          <div className={"md:hidden sticky mt-auto bottom-0 left-0 w-[calc(100%+2rem)] -ml-4 px-4 p-4 pb-8 bg-white border-t rounded-t-xl z-[99] transition-all duration-300"}>
+            <div className="max-w-md mx-auto flex gap-3">
+              <ButtonComponent
+                type="submit"
+                label="Simpan"
+                loading={loading}
+                rounded
+                block
+                className="py-3 flex-1"
+              />
+            </div>
           </div>
-        </div>
+        )}
       </form>
 
       <ModalConfirmComponent
@@ -385,7 +397,7 @@ export function FormSupervisionComponent({
       <ToastComponent
         show={modal == "success"}
         onClose={() => setModal(false)}
-        title="Berhasil disimpan!"
+        title={successMessage || "Berhasil disimpan!"}
         paint="success"
       />
     </>

@@ -2,8 +2,7 @@
 
 import { Suspense } from "react";
 import { HeadbarComponent, TableSupervisionComponent } from "@components";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserClock } from "@fortawesome/free-solid-svg-icons";
+import { conversion } from "@/utils";
 
 export default function PresencePage() {
   return (
@@ -14,6 +13,7 @@ export default function PresencePage() {
         <TableSupervisionComponent
           fetchControl={{
             path: "presences",
+            params: { expand: ["user"] },
           }}
           columnControl={[
             {
@@ -88,30 +88,18 @@ export default function PresencePage() {
                 const hasCheckOut = !!row.check_out;
                 return (
                   <div className="border bg-white rounded-lg px-4 py-3 flex items-center gap-3 transition-colors w-full">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center flex-shrink-0">
-                      <FontAwesomeIcon icon={faUserClock} className="text-sm text-[#006947]" />
-                    </div>
                     <div className="flex-grow min-w-0">
-                      <h4 className="text-on-surface font-bold text-base truncate">{row.employee || "Unknown"}</h4>
-                      <p className="text-xs text-on-surface-variant mt-0.5">{row.date || "-"}</p>
+                      <h4 className="text-on-surface font-bold text-base truncate">{row?.user?.name || "Unknown"}</h4>
+                      <p className="text-sm text-on-surface-variant mt-0.5">{row.date ? conversion.date(row.date, "DD MMMM YYYY") : "-"}</p>
                     </div>
                     <div className="flex-shrink-0 text-right">
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <span className="font-semibold text-[#006947]">{row.check_in || "--:--"}</span>
-                        <span className="text-[#9eaec7]">→</span>
-                        <span className="font-semibold" style={{ color: hasCheckOut ? "#006947" : "#9eaec7" }}>
-                          {row.check_out || "--:--"}
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <span className="font-semibold text-success">{row.check_in ? conversion.date(conversion.date(row.date, "YYYY-MM-DD") + "T" + row.check_in, "HH:mm") : "--:--"}</span>
+                        <span className="">→</span>
+                        <span className={`font-semibold ${hasCheckOut ? "text-success" : "text-light-foreground"}`}>
+                          {row.check_out ? conversion.date(conversion.date(row.date, "YYYY-MM-DD") + "T" + row.check_out, "HH:mm") : "--:--"}
                         </span>
                       </div>
-                      <span
-                        className="text-[10px] font-semibold px-2 py-0.5 rounded-md mt-1 inline-block"
-                        style={{
-                          backgroundColor: hasCheckOut ? "#69f6b8" : "rgb(248 160 16 / 0.2)",
-                          color: hasCheckOut ? "#005a3c" : "#4a2c00"
-                        }}
-                      >
-                        {hasCheckOut ? "Selesai" : "Aktif"}
-                      </span>
                     </div>
                   </div>
                 );

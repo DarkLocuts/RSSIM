@@ -26,7 +26,9 @@ export const UpdateProfileComponent = ({ show, onClose }: {
             method  :  "PUT",
           }}
           defaultValue={{
-            name: user?.name
+            name     :  user?.name,
+            contact  :  user?.contact,
+            address  :  user?.address
           }}
           fields={[
             {
@@ -52,7 +54,7 @@ export const UpdateProfileComponent = ({ show, onClose }: {
             }
           ]}
           onSuccess={(res) => {
-            setUser({...user, name: res.data?.name});
+            setUser({...user, name: res.data?.name, contact: res.data?.contact, address: res.data?.address});
             onClose()
           }}
           footerControl={({ loading }) => (

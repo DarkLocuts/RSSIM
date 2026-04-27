@@ -37,6 +37,7 @@ export default function LoginPage() {
               return values;
             }}
             onSuccess={handleLoginSuccess}
+            successMessage="Berhasil Masuk!"
             fields={[
               {
                 col: 12,

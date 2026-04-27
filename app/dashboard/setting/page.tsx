@@ -9,11 +9,12 @@ import { faBoxesStacked, faUsers, faBuilding, faChevronRight, faPen, faBook, faU
 import { auth } from "@utils";
 import { ModalConfirmComponent, ToastComponent } from "@components";
 import { UpdateProfileComponent, UpdatePasswordComponent } from "@app";
+import { useAuthContext } from "@/contexts";
 
 
 export default function AkunPage() {
   const router    =  useRouter();
-  // const { user }  =  useAuthContext()
+  const { user }  =  useAuthContext()
 
   const [showEditProfile, setShowEditProfile]        =  useState(false);
   const [showChangePassword, setShowChangePassword]  =  useState(false);
@@ -109,11 +110,13 @@ export default function AkunPage() {
     <div className="px-2 pt-2">
       <div className="flex items-center gap-4 p-4">
         <div className="w-16 h-16 rounded-full bg-light-primary flex items-center justify-center shrink-0">
-          <span className="text-xl font-bold text-primary">BS</span>
+          <span className="text-xl font-bold text-primary">
+            {user?.name?.substring(0, 2).toUpperCase()}
+          </span>
         </div>
         <div className="flex-1">
-          <h1 className="text-xl font-bold">Budi Santoso</h1>
-          <p className="text-sm font-medium">Administrator • <span className="font-semibold">@budisantoso</span></p>
+          <h1 className="text-xl font-bold">{user?.name}</h1>
+          <p className="text-sm font-medium">{user?.role?.name} • <span className="font-semibold">@{user?.username}</span></p>
         </div>
       </div>
 

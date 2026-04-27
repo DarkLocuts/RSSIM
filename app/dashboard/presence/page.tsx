@@ -8,28 +8,32 @@ import { faCamera, faCheckCircle, faCheckDouble } from "@fortawesome/free-solid-
 import { HeadbarComponent, ButtonComponent } from "@components"
 import { PresenceClockComponent } from "@app"
 import { api } from "@utils"
+import { useAuthContext } from "@contexts"
+import { useRouter } from "next/navigation"
 
 export default function PresencePage() {
-  const videoRef                       =  useRef<HTMLVideoElement>(null)
-  const [cameraReady, setCameraReady]  =  useState(false)
-  const [cameraError, setCameraError]  =  useState("")
-  const [presenceData, setPresenceData]=  useState<any>(null)
-  const [loading, setLoading]          =  useState(true)
-  const [submitting, setSubmitting]    =  useState(false)
-  const [preview, setPreview]          =  useState<{ blob: Blob, dataUrl: string } | null>(null)
+  const router                           =  useRouter()
+  const {user}                           =  useAuthContext()
+  const videoRef                         =  useRef<HTMLVideoElement>(null)
+  const [cameraReady, setCameraReady]    =  useState(false)
+  const [cameraError, setCameraError]    =  useState("")
+  const [presenceData, setPresenceData]  =  useState<any>(null)
+  const [loading, setLoading]            =  useState(true)
+  const [submitting, setSubmitting]      =  useState(false)
+  const [preview, setPreview]            =  useState<{ blob: Blob, dataUrl: string } | null>(null)
 
   const fetchPresence = async () => {
     setLoading(true)
-    const res = await api({ path: "presence", method: "GET" })
+    const res = await api({ path: "presences", method: "GET", params: { filter: [{column: "user_id", type: "eq", value: user?.id}, {column: "date", type: "eq", value: new Date().toISOString().split("T")[0]}]} })
     if (res?.status === 200) {
-      setPresenceData(res.data?.data || res.data)
+      setPresenceData(res.data?.data?.at(0) || null)
     }
     setLoading(false)
   }
 
   useEffect(() => {
-    fetchPresence()
-  }, [])
+    if(user?.id) fetchPresence()
+  }, [user])
 
   useEffect(() => {
     let stream: MediaStream | null = null
@@ -98,18 +102,30 @@ export default function PresencePage() {
     const type = (!presenceData || !presenceData.check_in) ? "check-in" : "check-out"
     
     const formData = new FormData()
-    formData.append("type", type)
-    formData.append("photo", preview.blob, `presence-${type}.jpg`)
+    const now = new Date()
+    const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+    const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`
+
+    formData.append("date", dateString)
+
+    if((!presenceData || !presenceData.check_in)) {
+      formData.append("check_in", timeString)
+    } else {
+      formData.append("check_out", timeString)
+    }
+
+    formData.append("image", preview.blob, `presence-${type}.jpg`)
     
     const res = await api({
-      path: "presence",
-      method: "POST",
+      path: presenceData?.id ? `presences/${presenceData?.id}` : "presences",
+      method: presenceData?.id ? "PUT" : "POST",
       payload: formData
     })
     
     if (res?.status === 200 || res?.status === 201) {
       setPreview(null)
       await fetchPresence()
+      router.push("/dashboard")
     }
     setSubmitting(false)
   }
