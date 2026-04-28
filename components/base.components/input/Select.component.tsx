@@ -321,7 +321,7 @@ export function SelectComponent({
             placeholder={!inputHandler.value || (Array.isArray(inputHandler.value) && !inputHandler.value.length) ? placeholder : ""}
             disabled={disabled}
             className={cn(
-              "input cursor-pointer",
+              "input focus:!border-primary cursor-pointer",
               leftIcon && "pl-12",
               rightIcon && "pr-12",
               pcn<CT>(className, "input"),

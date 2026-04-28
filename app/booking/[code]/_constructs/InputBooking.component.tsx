@@ -3,7 +3,7 @@
 import { InputHTMLAttributes, ReactNode, Ref, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cn, pcn, useInputHandler, useInputRandomId, useValidation, validation, ValidationRules } from "@utils";
-import { InputValues } from "./InputValues.component";
+import { InputValues } from "@/components";
 
 
 
@@ -36,7 +36,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 
 
 
-export function InputComponent({
+export function InputBookingComponent({
   label,
   tip,
   leftIcon,
@@ -157,11 +157,11 @@ export function InputComponent({
         <label
           htmlFor={randomId}
           className={cn(
-            "input-label",
+            "font-bold uppercase tracking-wider text-black",
             pcn<CT>(className, "label"),
             props.disabled && "opacity-50",
             props.disabled && pcn<CT>(className, "label", "disabled"),
-            inputHandler.focus && "text-primary",
+            inputHandler.focus && "text-[#ff2d78]",
             inputHandler.focus && pcn<CT>(className, "label", "focus"),
             !!invalidMessage && "text-danger",
             !!invalidMessage && pcn<CT>(className, "label", "focus"),
@@ -189,7 +189,7 @@ export function InputComponent({
             id={randomId}
             placeholder={!multiple || (multiple && !inputHandler.value?.length) ? props.placeholder : ""}
             className={cn(
-              "input focus:!border-primary",
+              "w-full py-3 px-4 bg-white border-2 border-b-4 border-r-4 !border-black focus:outline-none focus:!border-4 focus:!border-dotted focus:!border-[#ff2d78] !font-bold tracking-widest",
               props.type == "file" && "input-file",
               props.type == "color" && "h-10 p-1 cursor-pointer",
               leftIcon && "pl-12",
@@ -238,7 +238,7 @@ export function InputComponent({
 
 
           {(multiple) && (
-            <InputValues 
+            <InputValues
               value={inputHandler.value || []} 
               isFocus={inputHandler.focus} 
               onFocus={() => setTimeout(() => inputHandler.setFocus(true), 110)}
@@ -261,7 +261,7 @@ export function InputComponent({
                 pcn<CT>(className, "icon"),
                 props.disabled && "opacity-60",
                 props.disabled && pcn<CT>(className, "icon", "disabled"),
-                inputHandler.focus && "text-primary",
+                inputHandler.focus && "text-[#ff2d78]",
                 inputHandler.focus && pcn<CT>(className, "icon", "focus"),
               )}
               icon={leftIcon}
@@ -275,7 +275,7 @@ export function InputComponent({
                 pcn<CT>(className, "icon"),
                 props.disabled && "opacity-60",
                 props.disabled && pcn<CT>(className, "icon", "disabled"),
-                inputHandler.focus && "text-primary",
+                inputHandler.focus && "text-[#ff2d78]",
                 inputHandler.focus && pcn<CT>(className, "icon", "focus"),
               )}
               icon={rightIcon}

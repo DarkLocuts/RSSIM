@@ -119,7 +119,7 @@ export function InputPasswordComponent({
           type="password"
           id={randomId}
           className={cn(
-            "input",
+            "input focus:!border-primary",
             leftIcon && "pl-12",
             rightIcon && "pr-12",
             pcn<CT>(className, "base"),
@@ -213,7 +213,7 @@ export function InputPasswordComponent({
             id={randomConfirmId}
             type="password"
             className={cn(
-              "input",
+              "input focus:!border-primary",
               leftIcon && "pl-12",
               rightIcon && "pr-12",
               pcn<CT>(className, "base"),

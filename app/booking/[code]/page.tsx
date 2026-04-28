@@ -1,12 +1,27 @@
 "use client"
 
 import { useEffect, useState, use } from "react";
-import { api } from "@utils";
+import { api, conversion } from "@utils";
 import { FormSupervisionComponent } from "@components";
 import { BookingDetailComponent } from "./_structures/BookingDetail.component";
 import { CustomerUnitListSelectorComponent } from "./_constructs/UnitListSelector.construct";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import { InputBookingComponent } from "./_constructs/InputBooking.component";
+
+const statusColor = {
+  DRAFT     :  "bg-slate-100 text-slate-600",
+  ORDERED   :  "bg-cyan-100 text-cyan-600",
+  RENTED    :  "bg-blue-100 text-primary",
+  RETURNED  :  "bg-green-100 text-success",
+  CANCELED  :  "bg-red-100 text-danger",
+}
+
+const statusLabel = {
+  DRAFT     :  "DIBUAT",
+  ORDERED   :  "DIPESAN",
+  RENTED    :  "DISEWA",
+  RETURNED  :  "SELESAI",
+  CANCELED  :  "DIBATALKAN",
+}
 
 export default function PublicBookingPage({ params }: { params: Promise<{ code: string }> }) {
   const resolvedParams = use(params);
@@ -35,35 +50,12 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
     fetchBooking();
   }, [code]);
 
-  // Memphis Header
   const MemphisHeader = () => (
-    <div
-      className="flex items-center gap-3 px-4 py-3"
-      style={{
-        background: "#1a1a1a",
-        borderBottom: "3px solid #1a1a1a",
-      }}
-    >
-      <div
-        className="w-8 h-8 flex items-center justify-center cursor-pointer"
-        style={{
-          border: "2px solid #ffffff",
-        }}
-        onClick={() => window.history.back()}
-      >
-        <FontAwesomeIcon icon={faChevronLeft} className="text-white text-sm" />
+    <div className="relative">
+      <div className="px-6 py-4 border-b-2 !border-black bg-white relative z-20">
+        <p className="text-black font-extrabold uppercase tracking-widest">SEWA IPHONE MADIUN</p>
       </div>
-      <p
-        style={{
-          color: "#ffffff",
-          fontWeight: 900,
-          textTransform: "uppercase",
-          letterSpacing: "0.15em",
-          fontSize: "13px",
-        }}
-      >
-        SEWA IPHONE MADIUN
-      </p>
+      <div className="absolute w-full h-full bg-black top-1 left-1 z-10"></div>
     </div>
   );
 
@@ -125,160 +117,208 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
   const isDraft = !booking.status || booking.status === "DRAFT";
 
   return (
-    <div className="min-h-screen" style={{ background: "#f5f0e8" }}>
+    <div 
+      className="min-h-screen bg-white"
+      style={{
+        backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'24\' height=\'24\' viewBox=\'0 0 24 24\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'2\' cy=\'2\' r=\'2\' fill=\'%231a1a1a\' fill-opacity=\'0.15\'/%3E%3C/svg%3E")',
+        backgroundSize: '24px 24px'
+      }}
+    >
       <MemphisHeader />
       
-      <div className="max-w-md mx-auto p-4">
-        {/* Dotted border wrapper */}
-        <div
-          style={{
-            border: "3px dotted #c4c4c4",
-            padding: "16px",
-            background: "#ffffff",
-          }}
-        >
-          {isDraft ? (
-            <div className="memphis-form">
-              {/* Memphis-scoped CSS for form inputs */}
-              <style>{`
-                .memphis-form .input-label {
-                  font-weight: 800 !important;
-                  text-transform: uppercase !important;
-                  letter-spacing: 0.1em !important;
-                  font-size: 11px !important;
-                  color: #1a1a1a !important;
-                }
-                .memphis-form .input {
-                  border: 2.5px solid #1a1a1a !important;
-                  border-radius: 0px !important;
-                  padding: 12px 14px !important;
-                  font-size: 14px !important;
-                  background: #ffffff !important;
-                }
-                .memphis-form .input:focus {
-                  border-color: #ff2d78 !important;
-                }
-              `}</style>
-
-              {/* Form Title */}
-              <div className="mb-5 text-center">
-                <h2
-                  style={{
-                    fontWeight: 900,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    color: "#1a1a1a",
-                    fontSize: "22px",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  FORMULIR
+      <div className="max-w-md mx-auto max-h-[calc(100vh-60px)] overflow-y-auto p-6 pt-10 scroll-memphis">
+        {!isDraft && (
+          <>
+            <div className="relative mb-8 -rotate-2">
+              <div className="absolute w-full h-full bg-black top-2 left-2 z-10"></div>
+              <div className="bg-[#7dd3fc] border-4 !border-black p-4 relative z-20 ">
+                <h2 className="text-2xl font-extrabold text-black tracking-widest">
+                  PESANAN
                   <br />
-                  PEMESANAN
+                  #{booking.number || "-"}
                 </h2>
               </div>
-
-              <FormSupervisionComponent
-                submitControl={{
-                  path: `customer-booking/${booking.code}`,
-                  method: "POST"
-                }}
-                defaultValue={{
-                  customer_name     :  booking.customer_name,
-                  customer_contact  :  booking.customer_contact,
-                  start_date        :  booking.start_date,
-                  end_date          :  booking.end_date,
-                  unit_id           :  booking.unit_id
-                }}
-                onSuccess={() => {
-                  fetchBooking();
-                }}
-                footerControl={({ loading: isLoading }) => (
-                  <div className="mt-2">
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      style={{
-                        background: "#ff2d78",
-                        color: "#ffffff",
-                        fontWeight: 900,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.15em",
-                        fontSize: "14px",
-                        border: "3px solid #1a1a1a",
-                        borderRadius: "0px",
-                        padding: "14px 24px",
-                        width: "100%",
-                        cursor: isLoading ? "not-allowed" : "pointer",
-                        opacity: isLoading ? 0.7 : 1,
-                      }}
-                    >
-                      {isLoading ? "MENYIMPAN..." : "SIMPAN"}
-                    </button>
-                  </div>
-                )}
-                fields={[
-                  {
-                    col: 12,
-                    construction: {
-                      name         :  "customer_name",
-                      label        :  "Nama Pemesan",
-                      placeholder  :  "Masukkan nama lengkap Anda",
-                      validations  :  ["required", "max:200"],
-                    }
-                  },
-                  {
-                    col: 12,
-                    construction: {
-                      name         :  "customer_contact",
-                      label        :  "Kontak Pemesan (WA)",
-                      placeholder  :  "08xxxxxxxxxx",
-                      validations  :  ["required", "max:200"],
-                    }
-                  },
-                  {
-                    col: 12,
-                    construction: {
-                      type         :  "datetime-local",
-                      name         :  "start_at",
-                      label        :  "Tanggal Mulai",
-                      placeholder  :  "Pilih tanggal mulai",
-                      validations  :  ["required"],
-                    }
-                  },
-                  {
-                    col: 12,
-                    construction: {
-                      type         :  "datetime-local",
-                      name         :  "end_at",
-                      label        :  "Tanggal Selesai",
-                      placeholder  :  "Pilih tanggal selesai",
-                      validations  :  ["required"],
-                    }
-                  },
-                  {
-                    col: 12,
-                    type: "custom",
-                    construction: ({ formControl }) => {
-                      const ctrl = formControl("unit_id");
-                      return (
-                        <div className="pb-2">
-                          <CustomerUnitListSelectorComponent
-                            value={ctrl.value}
-                            invalid={ctrl.invalid}
-                            onChange={(val) => ctrl.onChange(val)}
-                            register={ctrl.register}
-                          />
-                        </div>
-                      );
-                    }
-                  },
-                ]}
-              />
             </div>
-          ) : (
-            <BookingDetailComponent booking={booking} />
-          )}
+            <div className="relative mb-6">
+              <div className="absolute w-full h-full bg-black top-2 left-2 z-10"></div>
+              <div className="absolute -top-1 -left-2 bg-white border-2 px-1 py-0.5 !border-black -rotate-5 text-[#ff2d78] font-bold text-xs uppercase tracking-widest z-30">Status</div>
+              <div className={`${statusColor[(booking?.status || "DRAFT") as keyof typeof statusColor]} border-4 !border-black p-4 relative z-20 font-extrabold uppercase tracking-widest`}>
+                {statusLabel[(booking?.status || "DRAFT") as keyof typeof statusLabel]}
+              </div>
+            </div>
+          </>
+        )}
+        <div className="relative">
+          <div className="absolute w-full h-full bg-black top-2 left-2 z-10"></div>
+          <div className="absolute w-7 h-7 -top-2 -left-2 bg-[#ff2d78] border-4 !border-black rounded-full z-30"></div>
+          <div className="bg-[#f5f0e8] border-4 !border-black p-4 relative z-20 ">
+            {isDraft ? (
+              <div className="memphis-form">
+                <div className="mb-8 pb-6 pt-2 text-center border-b-4 !border-black">
+                  <h2
+                    style={{
+                      fontWeight: 900,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      color: "#1a1a1a",
+                      fontSize: "22px",
+                      lineHeight: "1.2",
+                    }}
+                  >
+                    FORMULIR
+                    <br />
+                    PEMESANAN
+                  </h2>
+                </div>
+
+                <FormSupervisionComponent
+                  submitControl={{
+                    path: `customer-booking/${booking.code}`,
+                    method: "POST"
+                  }}
+                  defaultValue={{
+                    customer_name     :  booking.customer_name,
+                    customer_contact  :  booking.customer_contact,
+                    start_date        :  booking.start_date,
+                    end_date          :  booking.end_date,
+                    unit_id           :  booking.unit_id
+                  }}
+                  onSuccess={() => {
+                    fetchBooking();
+                  }}
+                  footerControl={({ loading: isLoading }) => (
+                    <div className="mt-2">
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        style={{
+                          background: "#ff2d78",
+                          color: "#ffffff",
+                          fontWeight: 900,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.15em",
+                          fontSize: "14px",
+                          border: "3px solid #1a1a1a",
+                          borderRadius: "0px",
+                          padding: "14px 24px",
+                          width: "100%",
+                          cursor: isLoading ? "not-allowed" : "pointer",
+                          opacity: isLoading ? 0.7 : 1,
+                        }}
+                      >
+                        {isLoading ? "MENGIRIMKAN..." : "PESAN SEKARANG"}
+                      </button>
+                    </div>
+                  )}
+                  fields={[
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        name="customer_namer" 
+                        label="Nama" 
+                        placeholder="Masukkan nama lengkap..."
+                        {...formControl("customer_name")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        name="customer_contact" 
+                        label="Kontak Pemesan (WA)" 
+                        placeholder="08xxxxxxxxxx"
+                        {...formControl("customer_contact")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        type="date"
+                        name="start_at" 
+                        label="Tanggal Pengambilan" 
+                        placeholder="Pilih tanggal mulai"
+                        {...formControl("start_at")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        type="date"
+                        name="end_at" 
+                        label="Tanggal Pengembalian" 
+                        placeholder="Pilih tanggal selesai"
+                        {...formControl("end_at")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl, setValues, values }) => {
+                        return (
+                          <div className="pb-2">
+                            <CustomerUnitListSelectorComponent
+                              value={formControl("unit_id").value}
+                              invalid={formControl("unit_id").invalid}
+                              onChange={(val, price) => {
+                                setValues([ ...values.filter((v: any) => v.name != "unit_id" && v.name != "price"), { name: "unit_id", value: val }, { name: "price", value: price } ])
+                              }}
+                              register={formControl("unit_id").register}
+                            />
+                          </div>
+                        );
+                      }
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ values }) => {
+                        const start = values.find((v) => v.name == "start_at")?.value ? new Date(values.find((v: any) => v.name == "start_at")?.value) : null;
+                        const end   = values.find((v) => v.name == "end_at")?.value ? new Date(values.find((v: any) => v.name == "end_at")?.value) : null;
+                        let days = 0;
+                        if (start && end && start <= end) {
+                          const diffTime = Math.abs(end.getTime() - start.getTime());
+                          days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                        }
+                        const price = values.find((v: any) => v?.name == "price")?.value || 0;
+                        const total = days * price;
+
+                        return (
+                          <div className="p-4 bg-white border-2 border-b-4 border-r-4 !border-black mt-2">
+                            <div className="flex justify-between items-center mb-2 pb-2 border-b-2 border-dashed !border-black">
+                              <span className="font-bold uppercase tracking-wider text-black text-sm">Total Hari</span>
+                              <span className="font-extrabold text-black">{days ? days + "Hari" : "-"}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="font-bold uppercase tracking-wider text-black text-sm">Total Bayar</span>
+                              <span className="font-extrabold text-[#ff2d78] text-xl">
+                                {total ? conversion.currency(total) : "-"}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+                    }
+                  ]}
+                />
+              </div>
+            ) : (
+              <BookingDetailComponent booking={booking} />
+            )}
+          </div>
+        </div>
+
+        <div className="mt-16">
+          <div className="text-center pb-2 mt-12">
+            <p className="text-[11px] font-semibold text-black text-on-surface-variant uppercase tracking-wider">
+              SEWA IPHONE MADIUN
+            </p>
+            <p className="text-[10px] text-slate-400 mt-0.5">
+              RSSIM v1.0.0 - Creative By <span className="text-[#ff2d78]">SEJE Digital</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -102,7 +102,7 @@ export function InputMapComponent({
             {...props}
             id={randomId}
             className={cn(
-              "input",
+              "input focus:!border-primary",
               leftIcon && "pl-12",
               rightIcon && "pr-12",
               pcn<CT>(className, "input"),

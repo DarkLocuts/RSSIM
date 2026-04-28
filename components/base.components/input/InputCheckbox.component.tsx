@@ -128,7 +128,7 @@ export function InputCheckboxComponent({
 
         <div
           className={cn(
-            `input overflow-auto input-scroll w-full flex flex-nowrap gap-y-2 gap-4`,
+            `input focus:!border-primary overflow-auto input-scroll w-full flex flex-nowrap gap-y-2 gap-4`,
             vertical && "flex-col flex-wrap",
             pcn<CT>(className, "input"),
             invalidMessage && "input-error",

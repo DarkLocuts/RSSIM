@@ -1,23 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { api } from "@utils";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { api, cn, conversion } from "@utils";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { InputBookingComponent } from "./InputBooking.component";
 
 type UnitItem = {
   id: number;
   label: string;
   code: string;
   status: string;
-  category?: { label?: string; name?: string; color?: string };
-  unit_category?: { label?: string; name?: string; color?: string };
+  unit_category?: { label?: string; name?: string; color?: string, price?: string };
 };
 
 type UnitListSelectorProps = {
   value?: number | string;
   invalid?: string;
-  onChange?: (value: number | string) => void;
+  onChange?: (value: number | string, price: number) => void;
   register?: (name: string, validations?: any) => void;
 };
 
@@ -59,12 +58,11 @@ export function CustomerUnitListSelectorComponent({
     fetchUnits();
   }, []);
 
-  // Filter units by search
   const filtered = units.filter((u) => {
     const keyword = search.toLowerCase();
     const label = (u.label || "").toLowerCase();
     const code = (u.code || "").toLowerCase();
-    const catName = (u.unit_category?.name || u.category?.name || "").toLowerCase();
+    const catName = (u.unit_category?.name || "").toLowerCase();
     return label.includes(keyword) || code.includes(keyword) || catName.includes(keyword);
   });
 
@@ -72,57 +70,27 @@ export function CustomerUnitListSelectorComponent({
     if (unit.status !== "AVAILABLE") return;
     const newValue = unit.id;
     setSelected(newValue);
-    onChange?.(newValue);
+    
+    onChange?.(newValue, Number(unit.unit_category?.price || 0));
   };
 
   return (
     <div className="w-full flex flex-col gap-2">
-      {/* Memphis Label */}
-      <label
-        style={{
-          fontWeight: 800,
-          textTransform: "uppercase",
-          letterSpacing: "0.1em",
-          fontSize: "11px",
-          color: "#1a1a1a",
-        }}
-      >
-        PILIH UNIT<span style={{ color: "#ff2d78" }}>*</span>
+      <label className="font-bold uppercase tracking-wider text-black">
+        PILIH IPHONE
       </label>
 
-      {/* Search - Memphis style */}
       <div className="relative">
-        <FontAwesomeIcon
-          icon={faSearch}
-          className="absolute left-3 top-1/2 -translate-y-1/2"
-          style={{ color: "#888", fontSize: "12px" }}
-        />
-        <input
-          type="text"
-          placeholder="Cari unit..."
+        <InputBookingComponent 
+          leftIcon={faSearch}
+          placeholder="Cari iphone..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px 14px 10px 34px",
-            border: "2.5px solid #1a1a1a",
-            borderRadius: "0px",
-            fontSize: "13px",
-            outline: "none",
-            background: "#ffffff",
-          }}
+          onChange={(e) => setSearch(e)}
+          className="py-2"
         />
       </div>
 
-      {/* Unit Grid - Memphis 2-column */}
-      <div
-        className="grid gap-2"
-        style={{
-          gridTemplateColumns: "1fr 1fr",
-          maxHeight: "320px",
-          overflowY: "auto",
-        }}
-      >
+      <div className="grid gap-2 max-h-[320px] overflow-y-auto scroll-memphis pr-2">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
               <div
@@ -155,7 +123,7 @@ export function CustomerUnitListSelectorComponent({
           : filtered.map((unit) => {
               const isAvailable = unit.status === "AVAILABLE";
               const isSelected = selected == unit.id;
-              const cat = unit.unit_category || unit.category;
+              const cat = unit.unit_category;
 
               return (
                 <button
@@ -163,40 +131,19 @@ export function CustomerUnitListSelectorComponent({
                   key={unit.id}
                   disabled={!isAvailable}
                   onClick={() => handleSelect(unit)}
-                  style={{
-                    border: isSelected && isAvailable
-                      ? "2.5px solid #ff2d78"
-                      : "2.5px solid #1a1a1a",
-                    borderRadius: "0px",
-                    padding: "12px 8px",
-                    textAlign: "center",
-                    cursor: isAvailable ? "pointer" : "not-allowed",
-                    opacity: isAvailable ? 1 : 0.4,
-                    background: isSelected && isAvailable ? "#ff2d78" : "#ffffff",
-                    transition: "all 0.1s ease",
-                  }}
+                  className={cn(
+                    "px-4 py-4 border-2 border-b-4 border-r-4 !border-black bg-white transition-all duration-100 ease-in-out", 
+                    isSelected && isAvailable && "border-2 !border-[#ff2d78] bg-[#ff2d78]",
+                    isAvailable ? "cursor-pointer" : "cursor-not-allowed",
+                    isAvailable ? "opacity-100" : "opacity-40"
+                  )}
                 >
-                  <p
-                    style={{
-                      fontWeight: 900,
-                      fontSize: "12px",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                      color: isSelected && isAvailable ? "#ffffff" : "#1a1a1a",
-                      lineHeight: "1.3",
-                    }}
-                  >
+                  <p className="font-extrabold text-black text-left uppercase">
                     {cat?.name || unit.label || "Unknown"}
                   </p>
                   {unit.code && (
-                    <p
-                      style={{
-                        fontSize: "10px",
-                        color: isSelected && isAvailable ? "#ffffffcc" : "#888",
-                        marginTop: "2px",
-                      }}
-                    >
-                      {unit.code}
+                    <p className={`text-left text-[#ff2d78] ${isSelected && isAvailable && "text-black"}`}>
+                      {conversion.currency(Number(cat?.price || 0))} / Hari
                     </p>
                   )}
                 </button>
