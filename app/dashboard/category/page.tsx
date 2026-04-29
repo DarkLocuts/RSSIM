@@ -53,6 +53,9 @@ export default function CategoryPage() {
             },
           ]}
           formControl={{
+            modalControl: {
+              size: 460,
+            },
             fields: [
               {
                 construction: {

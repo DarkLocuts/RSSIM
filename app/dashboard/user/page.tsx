@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense } from "react";
-import { HeadbarComponent, TableSupervisionComponent } from "@components";
+import { HeadbarComponent, SelectComponent, TableSupervisionComponent } from "@components";
 
 export default function UserPage() {
   return (
@@ -89,14 +89,20 @@ export default function UserPage() {
                 }
               },
               {
-                type: "select",
-                construction: {
-                  name                 :  "outlet_id",
-                  label                :  "Outlet",
-                  placeholder          :  "Pilih Outlet",
-                  serverOptionControl  :  {path: "outlets", params: {selectableOption: ["id", "name"]}},
-                  validations          :  ["required"]
-                }
+                type: "custom", 
+                construction: ({ formControl }) => (
+                  <>
+                    {formControl("role_id").value != 1 && (
+                      <SelectComponent 
+                        name="outlet_id"
+                        label="Outlet"
+                        placeholder="Pilih outlet..."
+                        serverOptionControl={{path: "outlets", params: {selectableOption: ["id", "name"]}}}
+                        {...formControl("outlet_id")}
+                      />
+                    )}
+                  </>
+                )
               },
               {
                 construction: {

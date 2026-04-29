@@ -6,11 +6,11 @@ import { faReceipt } from "@fortawesome/free-solid-svg-icons";
 
 export function BookingActivityLogSectionComponent({ logs = [] }: { logs: any[] }) {
   return (
-    <div className="bg-white rounded-xl border overflow-hidden mt-2">
+    <div className="bg-white rounded-xl border mt-2">
       <div className="px-4 py-3 border-b flex items-center justify-between">
         <h3 className="text-sm font-bold text-on-surface">Riwayat Aktifitas</h3>
       </div>
-      <div className="p-4 flex flex-col gap-4 relative">
+      <div className="p-4 flex flex-col gap-4 relative overflow-y-auto max-h-[300px]">
         {!logs || logs.length < 1 ? <>
           <div className="flex flex-col items-center justify-center py-8 px-8 text-center">
             <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">

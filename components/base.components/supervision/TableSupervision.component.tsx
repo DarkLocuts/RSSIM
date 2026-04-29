@@ -5,7 +5,7 @@ import { faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
 import { faEdit, faFileExcel, faFilePdf, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { ApiType, cn, conversion, shortcut, ShortcutHandler, UseResourceIdb, UseResourceProps, useResponsive, useTable } from "@utils";
 import { useToggleContext } from "@contexts";
-import { FloatingPageComponent, FloatingPageProps, ButtonComponent, IconButtonComponent, TableColumnType, TableComponent, FormSupervisionComponent, FormType, ModalConfirmComponent, TypographyColumnComponent, ButtonProps, ModalConfirmProps, TableProps, ControlBarOptionType, BottomSheetComponent, SwipeActionType, ExportExcel, ImportExcel } from "@components";
+import { FloatingPageComponent, FloatingPageProps, ButtonComponent, IconButtonComponent, TableColumnType, TableComponent, FormSupervisionComponent, FormType, ModalConfirmComponent, TypographyColumnComponent, ButtonProps, ModalConfirmProps, TableProps, ControlBarOptionType, BottomSheetComponent, SwipeActionType, ExportExcel, ImportExcel, BottomSheetProps } from "@components";
 
 
 
@@ -30,7 +30,7 @@ export interface TableSupervisionFormProps {
   fields                :  string[] | (FormType & { visibility?: "*" | "create" | "update" })[];
   defaultValue        ?:  (item: Record<string, any> | null) => Promise<Record<string, any>> | Record<string, any>;
   payload             ?:  (values: any) => Promise<Record<string, any>> | object;
-  modalControl        ?:  Omit<FloatingPageProps, "show" | "onClose" | "children">;
+  modalControl        ?:  Omit<FloatingPageProps, "show" | "onClose" | "children"> | Omit<BottomSheetProps, "show" | "onClose" | "children">;
   contentType         ?:  "application/json" | "multipart/form-data";
 };
 
@@ -376,7 +376,7 @@ export function TableSupervisionComponent({
         payload={formControl?.payload}
         onSuccess={() => {
           reset();
-          setToggle(`MODAL_FORM_${toggleKey}`, false);
+          setTimeout(() => { setToggle(`MODAL_FORM_${toggleKey}`, false) }, 1000);
         }}
       />
     )
@@ -554,9 +554,9 @@ export function TableSupervisionComponent({
           show={!!toggle[`MODAL_FORM_${toggleKey}`]}
           onClose={() => setToggle(`MODAL_FORM_${toggleKey}`, false)}
           className={cn("bg-white", formControl?.modalControl?.className)}
-          size="98vh"
+          size={(formControl?.modalControl as BottomSheetProps)?.size || "98vh"}
         >
-          <div className="p-4 h-[110vh]">
+          <div className="p-4">
             {formPage}
           </div>
         </BottomSheetComponent>
@@ -640,7 +640,7 @@ export function TableSupervisionComponent({
           },
           onSuccess: () => {
             reset();
-            setToggle(`MODAL_DELETE_${toggleKey}`, false);
+            setTimeout(() => { setToggle(`MODAL_DELETE_${toggleKey}`, false) }, 1000);
           },
         }}
       />

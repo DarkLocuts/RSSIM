@@ -40,6 +40,12 @@ export default function PresencePage() {
             },
           ]}
           formControl={{
+            defaultValue(item) {
+              return item?.id ? {
+                ...item,
+                date: conversion.date(item?.date, "YYYY-MM-DD"),
+              } : {}
+            },
             fields: [
               {
                 type: "select",

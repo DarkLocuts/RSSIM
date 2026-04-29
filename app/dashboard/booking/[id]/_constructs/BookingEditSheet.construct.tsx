@@ -56,7 +56,7 @@ export function BookingEditSheet({
           }}
           onSuccess={() => {
             if (onSuccess) onSuccess();
-            onClose();
+            setTimeout(() => { onClose() }, 500);
           }}
           fields={[
             ...(editType === "customer" ? [

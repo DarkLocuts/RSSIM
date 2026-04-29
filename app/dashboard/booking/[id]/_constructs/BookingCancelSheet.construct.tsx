@@ -25,7 +25,7 @@ export function BookingCancelSheet({ bookingId, show, onClose }: { bookingId: st
     });
     
     if (res?.status === 200 || res?.status === 201) {
-      onClose();
+      setTimeout(() => { onClose() }, 500);
       setCancelNote("");
       router.refresh();
     }

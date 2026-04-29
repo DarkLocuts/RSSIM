@@ -126,7 +126,7 @@ export function BookingDetailComponent({ booking }: { booking: any }) {
             {conversion.currency(booking?.total_charge || 0)}
           </span>
         </div>
-        <div className="border border-t-2 border-dashed mb-2 mt-3"></div>
+        <div className="border-t-2 border-dashed mb-2 mt-3"></div>
         <div className="flex items-center justify-between" style={{ marginBottom: "8px" }}>
           <span className="text-sm">Total Tagihan</span>
           <span className="text-sm text-black font-bold">

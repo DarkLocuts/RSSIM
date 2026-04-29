@@ -1,20 +1,23 @@
-import { cn } from "@utils"
+import { cn, conversion } from "@utils"
 
 const color = {
-  AVAILABLE    :  "bg-light-success text-success",
-  UNAVAILABLE  :  "bg-light-warning text-warning",
+  AVAILABLE    :  "bg-green-100 text-success",
+  UNAVAILABLE  :  "bg-amber-100 text-warning",
 }
 
 const label = {
   AVAILABLE    :  "TERSEDIA",
-  UNAVAILABLE  :  "TIDAK TERSEDIA",
+  UNAVAILABLE  :  "DISEWA",
 }
 
 
-export function UnitStatusComponent({status}: {status: "AVAILABLE" | "UNAVAILABLE"}) {
+export function UnitStatusComponent({status, outlet, available_at}: {status: "AVAILABLE" | "UNAVAILABLE", outlet?: string, available_at?: string}) {
   return (
     <>
-      <div className={cn("px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest w-max", color[status])}>{label[status]}</div>
+      <div className={cn("px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest w-max", color[status])}>
+        {label[status]}{" "}
+        {(status == "AVAILABLE" && outlet) && `(${outlet})`} {available_at && status !== "AVAILABLE" && `(${conversion.date(available_at, "DD/MM/YYYY")})`}
+      </div>
     </>
   )
 }

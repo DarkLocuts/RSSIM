@@ -20,7 +20,7 @@ export function HeadbarComponent({ title, noBtnBack, rightContent }: HeadbarProp
   const router  =  useRouter();
 
   return (
-    <div className="flex justify-between w-full items-center mt-2 mb-4">
+    <div className="flex justify-between w-full items-center mt-4 mb-4">
       <div className="flex items-center">
         {!noBtnBack && (
           <div className="w-8 aspect-square flex justify-center items-center md:hidden" onClick={() => router.back()}>

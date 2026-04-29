@@ -10,11 +10,11 @@ import { conversion, api } from "@/utils";
 import Link from "next/link";
 
 export default function BookingPage() {
-  const [showModal, setShowModal] = useState(false);
-  const [showSheet, setShowSheet] = useState(false);
-  const [createdLink, setCreatedLink] = useState("");
-  const [loadingLink, setLoadingLink] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [showModal, setShowModal]      =  useState(false);
+  const [showSheet, setShowSheet]      =  useState(false);
+  const [createdLink, setCreatedLink]  =  useState("");
+  const [loadingLink, setLoadingLink]  =  useState(false);
+  const [showToast, setShowToast]      =  useState(false);
 
   const handleCreateLink = async () => {
     setLoadingLink(true);
@@ -105,7 +105,7 @@ export default function BookingPage() {
                 }
               },
               {
-                col: 6,
+                col: 12,
                 construction: {
                   type         :  "datetime-local",
                   name         :  "start_at",
@@ -115,7 +115,7 @@ export default function BookingPage() {
                 }
               },
               {
-                col: 6,
+                col: 12,
                 construction: {
                   type         :  "datetime-local",
                   name         :  "end_at",
@@ -126,14 +126,31 @@ export default function BookingPage() {
               },
               {
                 type: "custom",
-                construction: ({ formControl }) => {
+                construction: ({ formControl, values }) => {
                   const ctrl = formControl("unit_id");
+                  const startAt = values?.find((v: any) => v.name === "start_at")?.value;
+                  const endAt = values?.find((v: any) => v.name === "end_at")?.value;
+
+                  if (!startAt || !endAt) {
+                    return (
+                      <div className="w-full flex flex-col gap-2">
+                        <label className="input-label">
+                          Unit<span className="text-danger">*</span>
+                        </label>
+                        <div className="text-sm text-warning p-6 border rounded-lg text-center font-medium">
+                          Isi tanggal mulai dan tanggal selesai untuk memilih unit yang tersedia.
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <UnitListSelectorComponent
                       value={ctrl.value}
                       invalid={ctrl.invalid}
                       onChange={(val) => ctrl.onChange(val)}
                       register={ctrl.register}
+                      availableAt={`${startAt}|${endAt}`}
                     />
                   );
                 }

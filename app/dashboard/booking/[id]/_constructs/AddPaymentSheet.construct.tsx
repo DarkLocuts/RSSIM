@@ -61,7 +61,7 @@ export function AddPaymentSheetComponent({ show, onClose, bookingId, onSuccess }
           ]}
           onSuccess={() => {
             onSuccess();
-            onClose();
+            setTimeout(() => { onClose() }, 500);
           }}
           footerControl={({ loading }) => (
             <ButtonComponent

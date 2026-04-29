@@ -1,7 +1,6 @@
 "use client"
 
-import { BottomSheetComponent, ButtonComponent, FormSupervisionComponent } from "@components";
-import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
+import { BottomSheetComponent, FormSupervisionComponent } from "@components";
 import { useAuthContext } from "@contexts";
 
 
@@ -55,18 +54,18 @@ export const UpdateProfileComponent = ({ show, onClose }: {
           ]}
           onSuccess={(res) => {
             setUser({...user, name: res.data?.name, contact: res.data?.contact, address: res.data?.address});
-            onClose()
+            setTimeout(() => onClose(), 1000)
           }}
-          footerControl={({ loading }) => (
-            <ButtonComponent
-              label="Simpan"
-              icon={faFloppyDisk}
-              type="submit"
-              loading={loading}
-              block
-              className="bg-primary text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform mt-5"
-            />
-          )}
+          // footerControl={({ loading }) => (
+          //   <ButtonComponent
+          //     label="Simpan"
+          //     icon={faFloppyDisk}
+          //     type="submit"
+          //     loading={loading}
+          //     block
+          //     className="bg-primary text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform mt-5"
+          //   />
+          // )}
         />
       </div>
     </BottomSheetComponent>

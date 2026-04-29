@@ -70,7 +70,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
 
       <div className="flex flex-col gap-2 mt-2">
         <BookingDetailSectionComponent booking={booking} onRefresh={fetchBooking} />
-        <PaymentListSectionComponent payments={booking.payments || []} booking={booking} onAddCharge={() => setShowAddCharge(true)} onAddPayment={() => setShowAddPayment(true)} />
+        <PaymentListSectionComponent payments={booking.booking_payments || []} booking={booking} onAddCharge={() => setShowAddCharge(true)} onAddPayment={() => setShowAddPayment(true)} onRefresh={fetchBooking} />
         <BookingActivityLogSectionComponent logs={booking.booking_logs || []} />
       </div>
 

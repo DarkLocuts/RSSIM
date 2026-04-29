@@ -12,6 +12,7 @@ export function BookingTakeSheet({ bookingId, show, onClose, type }: { bookingId
   const router = useRouter();
   
   const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState("");
   const [preview, setPreview] = useState<{ blob: Blob, dataUrl: string } | null>(null);
@@ -31,15 +32,14 @@ export function BookingTakeSheet({ bookingId, show, onClose, type }: { bookingId
   };
 
   useEffect(() => {
-    let stream: MediaStream | null = null;
-
     const startCamera = async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment", width: { ideal: 720 }, height: { ideal: 720 } },
           audio: false,
         });
 
+        streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setCameraReady(true);
@@ -56,8 +56,14 @@ export function BookingTakeSheet({ bookingId, show, onClose, type }: { bookingId
       startCamera();
     }
 
-    return () => { if (stream) stream.getTracks().forEach((track) => track.stop()); };
+    return () => { if (streamRef.current) { streamRef.current.getTracks().forEach((track) => track.stop()); streamRef.current = null; } };
   }, [show]);
+
+  useEffect(() => {
+    if (!preview && streamRef.current && videoRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [preview]);
 
   const capturePhoto = () => {
     if (videoRef.current) {
@@ -95,7 +101,7 @@ export function BookingTakeSheet({ bookingId, show, onClose, type }: { bookingId
     
     const res = await api({
       path: `bookings/${bookingId}/update-status`,
-      method: "PUT",
+      method: "POST",
       payload: formData
     });
     

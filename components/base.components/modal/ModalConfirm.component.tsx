@@ -1,7 +1,7 @@
 "use client"
 
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { faQuestion } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faQuestion } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { api, ApiType, cn, idb, pcn, shortcut, useResponsive } from "@utils";
 import { ToastComponent, ButtonComponent, ButtonProps, BottomSheetComponent } from "@components";
@@ -24,6 +24,7 @@ export interface ModalConfirmProps {
     onSuccess    ?:  () => void;
     onError      ?:  () => void;
   };
+  successMessage ?:  string;
 
   /** Use custom class with: "backdrop::", "header::", "footer::". */
   className  ?:  string;
@@ -40,6 +41,8 @@ export function ModalConfirmComponent({
 
   submitControl,
   onClose,
+
+  successMessage,
 
   className = "",
 }: ModalConfirmProps) {
@@ -132,6 +135,7 @@ export function ModalConfirmComponent({
 
               if (response?.status == 200 || response?.status == 201) {
                 setToast("success");
+                setTimeout(() => { setToast(false) }, 1000);
                 submitControl?.onSuccess?.();
                 setLoading(false);
               } else {
@@ -184,9 +188,20 @@ export function ModalConfirmComponent({
             size={220}
             footer={renderAction('lg')}
           >
-            {renderChildren}
-
-            {renderAction()}
+            {toast == "success" ? (
+              <div className="flex flex-col items-center justify-center h-full py-2 transition-all duration-300 animate-intro-down">
+                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+                  <FontAwesomeIcon icon={faCheck} className="text-primary text-2xl" />
+                </div>
+                <p className="text-primary text-lg font-semibold mt-4">{successMessage || "Berhasil!"}</p>
+              </div>
+            ) : (
+              <>
+                {renderChildren}
+    
+                {renderAction()}
+              </>
+            )}
           </BottomSheetComponent>
         </>
       )}
@@ -199,12 +214,12 @@ export function ModalConfirmComponent({
         paint="danger"
       />
 
-      <ToastComponent
+      {/* <ToastComponent
         show={toast == "success"}
         onClose={() => setToast(false)}
         title="Berhasil"
         paint="success"
-      />
+      /> */}
     </>
   );
 }

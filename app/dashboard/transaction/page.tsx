@@ -57,6 +57,12 @@ export default function TransactionPage() {
             },
           ]}
           formControl={{
+            payload: (v) => ({
+              description        :  v?.description,
+              type               :  v?.type,
+              amount             :  v?.amount,
+              payment_method_id  :  v?.payment_method_id,
+            }),
             fields: [
               {
                 construction: {

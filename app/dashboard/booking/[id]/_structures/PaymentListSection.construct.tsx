@@ -1,50 +1,14 @@
 "use client"
 
+import { useState } from "react";
 import { cn, conversion } from "@utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationTriangle, faMoneyBillWave, faReceipt } from "@fortawesome/free-solid-svg-icons";
-import { ButtonComponent } from "@/components";
+import { faExclamationTriangle, faMoneyBillWave, faReceipt, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { ButtonComponent, ModalConfirmComponent } from "@/components";
 
 
-// const typeConfig: Record<string, { label: string; icon: any; bg: string; text: string; iconBg: string; iconColor: string }> = {
-//   payment: {
-//     label: "Pembayaran",
-//     icon: faMoneyBillWave,
-//     bg: "bg-green-50",
-//     text: "text-green-700",
-//     iconBg: "bg-green-100",
-//     iconColor: "text-green-600",
-//   },
-//   penalty: {
-//     label: "Denda",
-//     icon: faExclamationTriangle,
-//     bg: "bg-red-50",
-//     text: "text-red-700",
-//     iconBg: "bg-red-100",
-//     iconColor: "text-red-600",
-//   },
-// };
-
-
-export function PaymentListSectionComponent({ booking, payments, onAddCharge, onAddPayment }: { booking: any, payments: any[], onAddCharge: () => void, onAddPayment: () => void }) {
-  // if (!payments || payments.length === 0) {
-  //   return (
-  //     <div className="bg-white rounded-xl border p-4">
-  //       <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">
-  //         Riwayat Pembayaran
-  //       </h3>
-  //       <div className="flex flex-col items-center justify-center py-8 text-center">
-  //         <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-  //           <FontAwesomeIcon icon={faReceipt} className="text-xl text-gray-400" />
-  //         </div>
-  //         <p className="text-sm text-on-surface-variant font-medium">Belum ada pembayaran</p>
-  //         <p className="text-xs text-on-surface-variant mt-1">
-  //           Gunakan tombol di bawah untuk menambahkan pembayaran atau denda.
-  //         </p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+export function PaymentListSectionComponent({ booking, payments, onAddCharge, onAddPayment, onRefresh }: { booking: any, payments: any[], onAddCharge: () => void, onAddPayment: () => void, onRefresh?: () => void }) {
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
 
   return (
     <div className="bg-white rounded-xl border shadow-sm">
@@ -91,7 +55,7 @@ export function PaymentListSectionComponent({ booking, payments, onAddCharge, on
         Riwayat Pembayaran ({!payments ? 0 : payments.length})
       </h3>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 p-2">
         {!payments || payments.length < 1 ? <>
           <div className="flex flex-col items-center justify-center py-8 px-8 text-center">
             <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
@@ -106,37 +70,31 @@ export function PaymentListSectionComponent({ booking, payments, onAddCharge, on
           return (
             <div
               key={payment.id || index}
-              className="border rounded-lg px-4 py-3 flex items-center gap-3 transition-colors"
+              className={`pl-4 pr-2 py-2 flex items-center gap-3 transition-colors ${index == payments.length - 1 ? "" : "border-b"}`}
             >
-              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-green-100")}>
-                <FontAwesomeIcon icon={faMoneyBillWave} className={cn("text-sm text-success")} />
-              </div>
-
               <div className="flex-grow min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full")}>
-                    {payment?.user?.name || ""}
-                  </span>
-                  {payment.payment_method?.name && (
-                    <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-                      {payment.payment_method.name}
-                    </span>
-                  )}
-                </div>
                 {payment.note && (
-                  <span className="text-[10px] text-light-foreground line-clamp-1">
+                  <span className="text-xs font-semibold line-clamp-1">
                     {payment.note}
                   </span>
                 )}
-                {payment.created_at && (
-                  <p className="text-[10px] text-on-surface-variant mt-0.5">{conversion.date(payment.created_at, "DD-MM-YYYY HH:mm:mm")}</p>
-                )}
+                <p className="text-[10px]">{payment.payment_method.name}</p>
               </div>
 
               <div className="flex-shrink-0 text-right">
+                {payment.created_at && (
+                  <p className="text-[10px] text-on-surface-variant mt-0.5">{conversion.date(payment.created_at, "DD-MM-YYYY HH:mm:mm")}</p>
+                )}
                 <p className="text-sm text-primary font-bold">
                   {conversion.currency(payment.amount || 0)}
                 </p>
+              </div>
+
+              <div 
+                className={cn("w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 bg-red-100 cursor-pointer hover:bg-red-200 transition-colors")}
+                onClick={() => setSelectedPayment(payment)}
+              >
+                <FontAwesomeIcon icon={faTimes} className={cn("text-[10px] text-danger")} />
               </div>
             </div>
           );
@@ -164,6 +122,22 @@ export function PaymentListSectionComponent({ booking, payments, onAddCharge, on
           rounded
         />
       </div>
+
+      <ModalConfirmComponent
+        show={!!selectedPayment}
+        onClose={() => setSelectedPayment(null)}
+        title={`Batalkan Pembayaran "${selectedPayment?.note}"`}
+        submitControl={{
+          onSubmit: {
+            path: `bookings/${booking?.id}/payments/${selectedPayment?.id}`,
+            method: "PUT"
+          },
+          onSuccess: () => {
+            setSelectedPayment(null);
+            onRefresh?.();
+          }
+        }}
+      />
     </div>
   );
 }

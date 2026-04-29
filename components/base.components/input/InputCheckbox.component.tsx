@@ -83,9 +83,12 @@ export function InputCheckboxComponent({
   useEffect(() => {
     const fetchOptions = async () => {
       setLoading(true);
-      const mutateOptions = await api(serverOptionControl || {});
+      const mutateOptions = await api({
+        ...serverOptionControl,
+        headers: { "X-Option": 1 }
+      });
       if (mutateOptions?.status == 200) {
-        customOptions ? setDataOptions([customOptions, ...mutateOptions.data]) : setDataOptions(mutateOptions.data);
+        customOptions ? setDataOptions([customOptions, ...mutateOptions.data?.data]) : setDataOptions(mutateOptions.data?.data);
         setLoading(false);
       }
     };
@@ -96,7 +99,7 @@ export function InputCheckboxComponent({
       !options && setDataOptions([]);
     }
   }, [serverOptionControl?.path, serverOptionControl?.url]);
-
+  
 
   return (
     <>

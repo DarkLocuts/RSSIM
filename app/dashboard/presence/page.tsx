@@ -15,6 +15,7 @@ export default function PresencePage() {
   const router                           =  useRouter()
   const {user}                           =  useAuthContext()
   const videoRef                         =  useRef<HTMLVideoElement>(null)
+  const streamRef                        =  useRef<MediaStream | null>(null)
   const [cameraReady, setCameraReady]    =  useState(false)
   const [cameraError, setCameraError]    =  useState("")
   const [presenceData, setPresenceData]  =  useState<any>(null)
@@ -36,15 +37,14 @@ export default function PresencePage() {
   }, [user])
 
   useEffect(() => {
-    let stream: MediaStream | null = null
-
     const startCamera = async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } },
           audio: false,
         })
 
+        streamRef.current = stream
         if (videoRef.current) {
           videoRef.current.srcObject = stream
           setCameraReady(true)
@@ -56,8 +56,14 @@ export default function PresencePage() {
 
     startCamera()
 
-    return () => { if (stream) stream.getTracks().forEach((track) => track.stop()) }
+    return () => { if (streamRef.current) { streamRef.current.getTracks().forEach((track) => track.stop()); streamRef.current = null } }
   }, [])
+
+  useEffect(() => {
+    if (!preview && streamRef.current && videoRef.current) {
+      videoRef.current.srcObject = streamRef.current
+    }
+  }, [preview])
 
   const capturePhoto = (): { blob: Blob, dataUrl: string } | null => {
     if (videoRef.current) {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBoxesStacked, faUsers, faBuilding, faChevronRight, faPen, faBook, faUserPen, faLock, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faBoxesStacked, faUsers, faBuilding, faChevronRight, faPen, faBook, faUserPen, faLock, faRightFromBracket, faCreditCard, faCalendarCheck } from "@fortawesome/free-solid-svg-icons";
 
 import { auth } from "@utils";
 import { ModalConfirmComponent, ToastComponent } from "@components";
@@ -40,6 +40,14 @@ export default function AkunPage() {
       bg: "bg-violet-50",
     },
     {
+      icon: faCreditCard,
+      label: "Metode Pembayaran",
+      description: "Atur metode pembayaran",
+      href: "/dashboard/payment-method",
+      color: "text-teal-600",
+      bg: "bg-teal-50",
+    },
+    {
       icon: faUsers,
       label: "Akun / Karyawan",
       description: "Kelola akun dan hak akses",
@@ -48,7 +56,7 @@ export default function AkunPage() {
       bg: "bg-emerald-50",
     },
     {
-      icon: faUsers,
+      icon: faCalendarCheck,
       label: "Kehadiran Karyawan",
       description: "Lihat kehadiran karyawan",
       href: "/dashboard/presence/list",
@@ -109,9 +117,9 @@ export default function AkunPage() {
   return (
     <div className="px-2 pt-2">
       <div className="flex items-center gap-4 p-4">
-        <div className="w-16 h-16 rounded-full bg-light-primary flex items-center justify-center shrink-0">
+        <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
           <span className="text-xl font-bold text-primary">
-            {user?.name?.substring(0, 2).toUpperCase()}
+            {(user?.name || "?").charAt(0).toUpperCase()}
           </span>
         </div>
         <div className="flex-1">

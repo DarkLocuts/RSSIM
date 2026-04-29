@@ -7,11 +7,11 @@ export default function OutletPage() {
   return (
     <Suspense>
       <div className="px-2">
-        <HeadbarComponent title="Cabang" />
+        <HeadbarComponent title="Metode Pembayaran" />
 
         <TableSupervisionComponent
           fetchControl={{
-            path: "outlets",
+            path: "payment-methods",
           }}
           columnControl={[
             {
@@ -25,8 +25,8 @@ export default function OutletPage() {
               sortable: true
             },
             {
-              selector: "address",
-              label: "Alamat",
+              selector: "description",
+              label: "Keterangan",
               sortable: true
             },
           ]}
@@ -36,16 +36,16 @@ export default function OutletPage() {
               {
                 construction: {
                   name: "name",
-                  label: "Nama Outlet",
-                  placeholder: "Masukkan nama outlet",
+                  label: "Nama",
+                  placeholder: "Masukkan nama",
                   validations: ["required", "max:200"]
                 }
               },
               {
                 construction: {
-                  name: "address",
-                  label: "Alamat",
-                  placeholder: "Masukkan alamat outlet",
+                  name: "description",
+                  label: "Keterangan",
+                  placeholder: "Masukkan nomor rekening / VA / dll",
                   validations: ["required", "max:500"]
                 }
               },
@@ -60,8 +60,8 @@ export default function OutletPage() {
                 return (
                   <div className="border bg-white rounded-lg px-4 py-3 flex items-center gap-3 transition-colors w-full">
                     <div className="flex-grow min-w-0">
-                      <h4 className="text-on-surface font-bold text-base truncate">{row.name || "Unknown Outlet"}</h4>
-                      <p className="text-xs text-on-surface-variant mt-0.5 truncate">{row.address || "-"}</p>
+                      <h4 className="text-on-surface font-bold text-base truncate">{row.name || "-"}</h4>
+                      <p className="text-xs text-on-surface-variant mt-0.5 truncate">{row.description || "-"}</p>
                     </div>
                     <div className="flex-shrink-0">
                       <span className="text-[10px] font-semibold text-primary bg-cyan-50 px-2 py-1 rounded-md uppercase tracking-wider">

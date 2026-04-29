@@ -1,7 +1,7 @@
 "use client"
 
 import React, { ReactNode, useEffect, useState } from "react";
-import { faSave, faQuestionCircle, faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faSave, faQuestionCircle, faPlus, faTimes, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { ApiType, cn, pcn, FormErrorType, FormRegisterType, FormValueType, useForm, ValidationRules, DBSchema } from "@utils";
 import {
   InputCheckboxComponent,
@@ -35,6 +35,7 @@ import {
   InputMapComponent,
   InputMapProps,
 } from "@components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
 
@@ -156,6 +157,7 @@ export function FormSupervisionComponent({
     (data: any) => {
       onSuccess?.(data);
       setModal("success");
+      setTimeout(() => setModal(false), 1000);
       resetFresh();
     },
     (code: number) => {
@@ -338,44 +340,51 @@ export function FormSupervisionComponent({
     <>
       {title && <h4 className={cn("text-lg font-semibold mb-4", pcn<CT>(className, "title"))}>{title}</h4>}
 
-      <form id={id} className={cn("flex flex-col h-full")} onSubmit={submit}>
-        <div className={cn("grid grid-cols-12 gap-4 flex-1 content-start", pcn<CT>(className, "base"))}>
-          {fresh && fields.map((f, i) => renderInput(f, i))}
+      {modal == "success" ? (
+        <div className="flex flex-col items-center justify-center h-full py-6 transition-all duration-300 animate-intro-down">
+          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+            <FontAwesomeIcon icon={faCheck} className="text-primary text-2xl" />
+          </div>
+          <p className="text-primary text-lg font-semibold mt-4">{successMessage || "Berhasil disimpan!"}</p>
+        </div>
+      ) : (
+        <form id={id} className={cn("flex flex-col h-full pb-8")} onSubmit={submit}>
+          <div className={cn("grid grid-cols-12 gap-4 flex-1 content-start", pcn<CT>(className, "base"))}>
+            {fresh && fields.map((f, i) => renderInput(f, i))}
 
-          <div className="hidden md:block col-span-12">
-            {footerControl?.({ loading }) || (
-              <div className="flex justify-end mt-4">
+            {!footerControl && (
+              <div className="hidden md:block col-span-12">
+                <div className="flex justify-end mt-4">
+                  <ButtonComponent
+                    type="submit"
+                    label="Simpan"
+                    icon={faSave}
+                    loading={loading}
+                    className={pcn<CT>(className, "submit")}
+                  />
+                </div>
+              </div>
+            )}
+
+            {!footerControl && (
+              <div className={"md:hidden col-span-12 px-4"}>
                 <ButtonComponent
-                  type="submit"
                   label="Simpan"
                   icon={faSave}
+                  type="submit"
                   loading={loading}
-                  className={pcn<CT>(className, "submit")}
+                  block
+                  className="bg-primary text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform mt-5"
                 />
               </div>
             )}
+            
+            {footerControl && (
+              <div className="col-span-12">{footerControl?.({ loading })}</div>
+            )}
           </div>
-          
-          {footerControl && (
-            <div className="col-span-12">{footerControl?.({ loading })}</div>
-          )}
-        </div>
-
-        {!footerControl && (
-          <div className={"md:hidden sticky mt-auto bottom-0 left-0 w-[calc(100%+2rem)] -ml-4 px-4 p-4 pb-8 bg-white border-t rounded-t-xl z-[99] transition-all duration-300"}>
-            <div className="max-w-md mx-auto flex gap-3">
-              <ButtonComponent
-                type="submit"
-                label="Simpan"
-                loading={loading}
-                rounded
-                block
-                className="py-3 flex-1"
-              />
-            </div>
-          </div>
-        )}
-      </form>
+        </form>
+      )}
 
       <ModalConfirmComponent
         show={confirm.show}
@@ -394,12 +403,12 @@ export function FormSupervisionComponent({
         paint="danger"
       />
 
-      <ToastComponent
+      {/* <ToastComponent
         show={modal == "success"}
         onClose={() => setModal(false)}
         title={successMessage || "Berhasil disimpan!"}
         paint="success"
-      />
+      /> */}
     </>
   );
 }

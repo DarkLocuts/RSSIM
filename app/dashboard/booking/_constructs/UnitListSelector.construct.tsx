@@ -4,22 +4,22 @@ import { useEffect, useState } from "react";
 import { api, cn } from "@utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMobileAlt, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { UnitStatusComponent } from "@app";
 
 type UnitItem = {
-  id: number;
-  label: string;
-  code: string;
-  status: string;
-  category?: { label?: string; name?: string; color?: string };
-  unit_category?: { label?: string; name?: string; color?: string };
+  id              :  number;
+  label           :  string;
+  code            :  string;
+  status          :  string;
+  description     :  string;
+  unit_category  ?:  { label?: string; name?: string; color?: string };
 };
 
 type UnitListSelectorProps = {
-  value?: number | string;
-  invalid?: string;
-  onChange?: (value: number | string) => void;
-  register?: (name: string, validations?: any) => void;
+  value        ?:  number | string;
+  invalid      ?:  string;
+  onChange     ?:  (value: number | string) => void;
+  register     ?:  (name: string, validations?: any) => void;
+  availableAt  ?:  string;
 };
 
 export function UnitListSelectorComponent({
@@ -27,29 +27,35 @@ export function UnitListSelectorComponent({
   invalid,
   onChange,
   register,
+  availableAt,
 }: UnitListSelectorProps) {
   const [units, setUnits] = useState<UnitItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<number | string | undefined>(value);
 
-  // Register for validation
   useEffect(() => {
     register?.("unit_id", ["required"]);
   }, []);
 
-  // Sync external value
   useEffect(() => {
     setSelected(value);
   }, [value]);
 
-  // Fetch units from API
   useEffect(() => {
     const fetchUnits = async () => {
       setLoading(true);
+      const params: any = { expand: ["unit_category"] };
+      if (availableAt) {
+        params.available_at = availableAt;
+      }
+
       const res = await api({
         path: "units",
-        params: { expand: ["unit_category"] },
+        params: {
+          ...params,
+          paginate: 9999,
+        },
       });
       if (res?.status === 200) {
         const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
@@ -58,14 +64,13 @@ export function UnitListSelectorComponent({
       setLoading(false);
     };
     fetchUnits();
-  }, []);
+  }, [availableAt]);
 
-  // Filter units by search
   const filtered = units.filter((u) => {
     const keyword = search.toLowerCase();
     const label = (u.label || "").toLowerCase();
     const code = (u.code || "").toLowerCase();
-    const catName = (u.unit_category?.name || u.category?.name || "").toLowerCase();
+    const catName = (u.unit_category?.name || "").toLowerCase();
     return label.includes(keyword) || code.includes(keyword) || catName.includes(keyword);
   });
 
@@ -82,7 +87,6 @@ export function UnitListSelectorComponent({
         Unit<span className="text-danger">*</span>
       </label>
 
-      {/* Search */}
       <div className="relative">
         <FontAwesomeIcon
           icon={faSearch}
@@ -97,7 +101,6 @@ export function UnitListSelectorComponent({
         />
       </div>
 
-      {/* Unit List */}
       <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto input-scroll pr-1">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
@@ -118,7 +121,7 @@ export function UnitListSelectorComponent({
           : filtered.map((unit) => {
               const isAvailable = unit.status === "AVAILABLE";
               const isSelected = selected == unit.id;
-              const cat = unit.unit_category || unit.category;
+              const cat = unit.unit_category;
 
               return (
                 <button
@@ -127,12 +130,11 @@ export function UnitListSelectorComponent({
                   disabled={!isAvailable}
                   onClick={() => handleSelect(unit)}
                   className={cn(
-                    "border bg-white rounded-lg px-4 py-3 flex items-center gap-3 transition-all w-full text-left",
+                    "border bg-white rounded-lg px-4 py-3 flex items-center gap-3 transition-all w-full text-left relative",
                     isAvailable ? "cursor-pointer hover:border-primary/50" : "opacity-50 cursor-not-allowed",
                     isSelected && isAvailable && "border-primary ring-1 ring-primary/30 bg-primary/5"
                   )}
                 >
-                  {/* Radio Button */}
                   <div className="flex-shrink-0">
                     <div
                       className={cn(
@@ -149,7 +151,6 @@ export function UnitListSelectorComponent({
                     </div>
                   </div>
 
-                  {/* Icon */}
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold text-white"
                     style={{ backgroundColor: cat?.color || "#7b9cff" }}
@@ -157,26 +158,22 @@ export function UnitListSelectorComponent({
                     <FontAwesomeIcon icon={faMobileAlt} className="text-lg" />
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-grow min-w-0">
-                    <h4 className="text-on-surface font-bold text-base truncate">
-                      {unit.label || "Unknown Unit"}
-                    </h4>
-                    <p className="text-xs text-on-surface-variant mt-0.5 truncate">
-                      {cat?.name || "Unknown Category"} &bull; {unit.code || "-"}
-                    </p>
-                  </div>
-
-                  {/* Status */}
-                  <div className="flex-shrink-0">
-                    <UnitStatusComponent status={unit.status as "AVAILABLE" | "UNAVAILABLE"} />
+                  <div className="w-full">
+                    <div className="flex justify-between items-center w-full">
+                      <h4 className="text-on-surface font-bold text-base truncate">
+                        {unit.unit_category?.name || "-"}
+                      </h4>
+                      <p className="text-[10px] text-on-surface-variant mt-0.5 truncate">
+                        {unit.code || "-"}
+                      </p>
+                    </div>
+                    <div className="text-xs">{unit?.description || "-"}</div>
                   </div>
                 </button>
               );
             })}
       </div>
 
-      {/* Validation Error */}
       {invalid && (
         <small className="input-error-message">{invalid}</small>
       )}
