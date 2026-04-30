@@ -41,7 +41,7 @@ export function BookingDetailSectionComponent({ booking, onRefresh }: { booking:
               Informasi Pemesan
             </h3>
 
-            {(booking.status !== "RETURNED") &&
+            {(booking.status !== "RETURNED" && booking.status !== "CANCELED") &&
               <ButtonComponent
                 icon={faEdit}
                 size="xs"
@@ -79,7 +79,7 @@ export function BookingDetailSectionComponent({ booking, onRefresh }: { booking:
             <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
               Unit Disewa
             </h3>
-            {(booking.status !== "RETURNED") &&
+            {(booking.status !== "RETURNED" && booking.status !== "CANCELED") &&
               <ButtonComponent
                 icon={faEdit}
                 size="xs"
@@ -100,7 +100,7 @@ export function BookingDetailSectionComponent({ booking, onRefresh }: { booking:
             <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
               Jadwal Sewa
             </h3>
-            {(booking.status !== "RETURNED") &&
+            {(booking.status !== "RETURNED" && booking.status !== "CANCELED") &&
               <ButtonComponent
                 icon={faEdit}
                 size="xs"
@@ -167,6 +167,7 @@ export function BookingDetailSectionComponent({ booking, onRefresh }: { booking:
           block
           rounded
           variant="outline"
+          disabled={booking.status === "CANCELED"}
         />
 
         {booking.status !== "CANCELED" && booking.status !== "RENTED" && booking.status !== "RETURNED" && (

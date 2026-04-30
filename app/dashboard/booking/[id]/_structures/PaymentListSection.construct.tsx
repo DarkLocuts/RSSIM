@@ -111,6 +111,7 @@ export function PaymentListSectionComponent({ booking, payments, onAddCharge, on
           onClick={onAddCharge}
           block
           rounded
+          disabled={booking.status === "CANCELED"}
         />
         <ButtonComponent
           size="sm"
@@ -120,6 +121,7 @@ export function PaymentListSectionComponent({ booking, payments, onAddCharge, on
           onClick={onAddPayment}
           block
           rounded
+          disabled={booking.status !== "CANCELED"}
         />
       </div>
 
