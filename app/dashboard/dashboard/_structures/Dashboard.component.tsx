@@ -13,6 +13,9 @@ export function DashboardComponent() {
 
   return (
     <>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-base font-bold">Ringkasan Hari Ini</h2>
+      </div>
       <div className="grid grid-cols-2 gap-2 mb-2">
         <DashboardCardComponent 
           title="Semua Unit"

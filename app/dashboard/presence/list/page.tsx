@@ -86,7 +86,107 @@ export default function PresencePage() {
             ]
           }}
           controlBar={["CREATE", "SEARCH"]}
-          detailControl={false}
+          detailControl={(row) => {
+            const storageHost = process.env.NEXT_PUBLIC_STORAGE_HOST;
+            const checkInImageUrl  = row?.check_in_image  ? `${storageHost}/${row.check_in_image}`  : null;
+            const checkOutImageUrl = row?.check_out_image ? `${storageHost}/${row.check_out_image}` : null;
+
+            const handleDownload = (url: string, filename: string) => {
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = filename;
+              a.target = "_blank";
+              a.click();
+            };
+
+            return (
+              <div className="flex flex-col gap-4">
+                {/* ── Info rows ── */}
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <div className="text-xs font-semibold text-light-foreground">Karyawan</div>
+                    <div className="font-semibold">{row?.user?.name || row?.employee || "-"}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-light-foreground">Tanggal</div>
+                    <div className="font-semibold">{row?.date ? conversion.date(row.date, "DD MMMM YYYY") : "-"}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <div className="text-xs font-semibold text-light-foreground">Check In</div>
+                      <div className="font-semibold text-success">{row?.check_in || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-semibold text-light-foreground">Check Out</div>
+                      <div className={`font-semibold ${row?.check_out ? "text-success" : "text-light-foreground"}`}>{row?.check_out || "-"}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Photo previews ── */}
+                {(checkInImageUrl || checkOutImageUrl) && (
+                  <div className="flex flex-col gap-3">
+                    <div className="text-xs font-semibold text-light-foreground uppercase tracking-wide">Foto Presensi</div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Check In Photo */}
+                      <div className="flex flex-col gap-1.5">
+                        <div className="text-xs font-semibold text-on-surface-variant">Check In</div>
+                        {checkInImageUrl ? (
+                          <div className="relative group rounded-xl overflow-hidden border bg-surface aspect-square">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={checkInImageUrl}
+                              alt="Foto Check In"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <button
+                                onClick={() => handleDownload(checkInImageUrl, `check-in-${row?.date || "foto"}.jpg`)}
+                                className="bg-white text-on-surface text-xs font-semibold px-3 py-1.5 rounded-lg shadow hover:bg-surface transition"
+                              >
+                                Download
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="rounded-xl border bg-surface aspect-square flex items-center justify-center text-xs text-light-foreground">
+                            Tidak ada foto
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Check Out Photo */}
+                      <div className="flex flex-col gap-1.5">
+                        <div className="text-xs font-semibold text-on-surface-variant">Check Out</div>
+                        {checkOutImageUrl ? (
+                          <div className="relative group rounded-xl overflow-hidden border bg-surface aspect-square">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={checkOutImageUrl}
+                              alt="Foto Check Out"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <button
+                                onClick={() => handleDownload(checkOutImageUrl, `check-out-${row?.date || "foto"}.jpg`)}
+                                className="bg-white text-on-surface text-xs font-semibold px-3 py-1.5 rounded-lg shadow hover:bg-surface transition"
+                              >
+                                Download
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="rounded-xl border bg-surface aspect-square flex items-center justify-center text-xs text-light-foreground">
+                            Tidak ada foto
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          }}
           block
           responsiveControl={{
             mobile: {

@@ -20,6 +20,7 @@ type UnitListSelectorProps = {
   onChange     ?:  (value: number | string) => void;
   register     ?:  (name: string, validations?: any) => void;
   availableAt  ?:  string;
+  exceptId     ?:  number | string;
 };
 
 export function UnitListSelectorComponent({
@@ -28,6 +29,7 @@ export function UnitListSelectorComponent({
   onChange,
   register,
   availableAt,
+  exceptId,
 }: UnitListSelectorProps) {
   const [units, setUnits] = useState<UnitItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +50,10 @@ export function UnitListSelectorComponent({
       const params: any = { expand: ["unit_category"] };
       if (availableAt) {
         params.available_at = availableAt;
+      }
+
+      if(exceptId) {
+        params.filter = [{column: "id", type: "ne", value: exceptId}]
       }
 
       const res = await api({

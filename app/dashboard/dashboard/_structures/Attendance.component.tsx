@@ -35,7 +35,7 @@ export function AttendanceComponent() {
           </div>
 
           <div className="text-right">
-            {!presenceData?.check_in && !presenceData?.check_out ? (
+            {!presenceData?.check_in || !presenceData?.check_out ? (
               <PresenceClockComponent />
             ) : (
               <p className="text-xs font-bold uppercase tracking-wider bg-green-200 text-success px-3 py-1 rounded-full">Selesai</p>

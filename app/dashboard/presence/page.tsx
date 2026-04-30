@@ -105,8 +105,6 @@ export default function PresencePage() {
     if (!preview) return
     
     setSubmitting(true)
-    const type = (!presenceData || !presenceData.check_in) ? "check-in" : "check-out"
-    
     const formData = new FormData()
     const now = new Date()
     const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
@@ -120,7 +118,11 @@ export default function PresencePage() {
       formData.append("check_out", timeString)
     }
 
-    formData.append("image", preview.blob, `presence-${type}.jpg`)
+    if((!presenceData || !presenceData.check_in)) {
+      formData.append("check_in_image", preview.blob, `presence-check_in_image.jpg`)
+    } else {
+      formData.append("check_out_image", preview.blob, `presence-check_out_image.jpg`)
+    }
     
     const res = await api({
       path: presenceData?.id ? `presences/${presenceData?.id}` : "presences",

@@ -2,22 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { api, cn, conversion } from "@utils";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import { InputBookingComponent } from "./InputBooking.component";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMobileAlt } from "@fortawesome/free-solid-svg-icons";
 
-type UnitItem = {
-  id: number;
-  label: string;
-  code: string;
-  status: string;
-  unit_category?: { label?: string; name?: string; color?: string, price?: string };
+type UnitCategoryItem = {
+  id           :  number;
+  code         :  string;
+  name         :  string;
+  color        :  string;
+  price        :  number | string;
+  hourly_price :  number | string;
+  status       :  string; // 'AVAILABLE' | 'UNAVAILABLE'
 };
 
 type UnitListSelectorProps = {
-  value?: number | string;
-  invalid?: string;
-  onChange?: (value: number | string, price: number) => void;
-  register?: (name: string, validations?: any) => void;
+  value        ?:  number | string;
+  invalid      ?:  string;
+  onChange     ?:  (value: number | string, price: number) => void;
+  register     ?:  (name: string, validations?: any) => void;
+  availableAt  ?:  string;
 };
 
 export function CustomerUnitListSelectorComponent({
@@ -25,15 +28,15 @@ export function CustomerUnitListSelectorComponent({
   invalid,
   onChange,
   register,
+  availableAt,
 }: UnitListSelectorProps) {
-  const [units, setUnits] = useState<UnitItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<number | string | undefined>(value);
+  const [categories, setCategories] = useState<UnitCategoryItem[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [selected, setSelected]     = useState<number | string | undefined>(value);
 
   // Register for validation
   useEffect(() => {
-    register?.("unit_id", ["required"]);
+    register?.("unit_category_id", ["required"]);
   }, []);
 
   // Sync external value
@@ -41,37 +44,39 @@ export function CustomerUnitListSelectorComponent({
     setSelected(value);
   }, [value]);
 
-  // Fetch units from API
+  // Fetch unit categories from API
   useEffect(() => {
-    const fetchUnits = async () => {
+    const fetchCategories = async () => {
       setLoading(true);
+      const params: any = {};
+      if (availableAt) {
+        params.available_at = availableAt;
+      }
       const res = await api({
         path: "customer-booking-units",
-        params: { expand: ["unit_category"] },
+        params,
       });
       if (res?.status === 200) {
         const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        setUnits(data);
+        setCategories(data);
       }
       setLoading(false);
     };
-    fetchUnits();
-  }, []);
+    fetchCategories();
+  }, [availableAt]);
 
-  const filtered = units.filter((u) => {
-    const keyword = search.toLowerCase();
-    const label = (u.label || "").toLowerCase();
-    const code = (u.code || "").toLowerCase();
-    const catName = (u.unit_category?.name || "").toLowerCase();
-    return label.includes(keyword) || code.includes(keyword) || catName.includes(keyword);
-  });
+  // const filtered = categories.filter((c) => {
+  //   const keyword = search.toLowerCase();
+  //   return (
+  //     (c.name || "").toLowerCase().includes(keyword) ||
+  //     (c.code || "").toLowerCase().includes(keyword)
+  //   );
+  // });
 
-  const handleSelect = (unit: UnitItem) => {
-    if (unit.status !== "AVAILABLE") return;
-    const newValue = unit.id;
-    setSelected(newValue);
-    
-    onChange?.(newValue, Number(unit.unit_category?.price || 0));
+  const handleSelect = (cat: UnitCategoryItem) => {
+    if (cat.status !== "AVAILABLE") return;
+    setSelected(cat.id);
+    onChange?.(cat.id, Number(cat.price || 0));
   };
 
   return (
@@ -80,7 +85,7 @@ export function CustomerUnitListSelectorComponent({
         PILIH IPHONE
       </label>
 
-      <div className="relative">
+      {/* <div className="relative">
         <InputBookingComponent 
           leftIcon={faSearch}
           placeholder="Cari iphone..."
@@ -88,9 +93,9 @@ export function CustomerUnitListSelectorComponent({
           onChange={(e) => setSearch(e)}
           className="py-2"
         />
-      </div>
+      </div> */}
 
-      <div className="grid gap-2 max-h-[320px] overflow-y-auto scroll-memphis pr-2">
+      <div className="grid gap-2">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
               <div
@@ -104,7 +109,7 @@ export function CustomerUnitListSelectorComponent({
                 }}
               />
             ))
-          : filtered.length === 0
+          : categories.length === 0
           ? (
             <div
               className="col-span-2 text-center"
@@ -117,35 +122,50 @@ export function CustomerUnitListSelectorComponent({
                 letterSpacing: "0.1em",
               }}
             >
-              Tidak ada unit ditemukan
+              Tidak ada kategori unit ditemukan
             </div>
           )
-          : filtered.map((unit) => {
-              const isAvailable = unit.status === "AVAILABLE";
-              const isSelected = selected == unit.id;
-              const cat = unit.unit_category;
+          : categories.map((cat) => {
+              const isAvailable = cat.status === "AVAILABLE";
+              const isSelected  = selected == cat.id;
 
               return (
                 <button
                   type="button"
-                  key={unit.id}
+                  key={cat.id}
                   disabled={!isAvailable}
-                  onClick={() => handleSelect(unit)}
+                  onClick={() => handleSelect(cat)}
                   className={cn(
-                    "px-4 py-4 border-2 border-b-4 border-r-4 !border-black bg-white transition-all duration-100 ease-in-out", 
-                    isSelected && isAvailable && "border-2 !border-[#ff2d78] bg-[#ff2d78]",
-                    isAvailable ? "cursor-pointer" : "cursor-not-allowed",
-                    isAvailable ? "opacity-100" : "opacity-40"
+                    "px-4 py-4 border-2 border-b-4 border-r-4 !border-black bg-white transition-all duration-100 ease-in-out text-left",
+                    isSelected && isAvailable && "bg-[#ff2d78]",
+                    isAvailable ? "cursor-pointer" : "cursor-not-allowed opacity-40"
                   )}
                 >
-                  <p className="font-extrabold text-black text-left uppercase">
-                    {cat?.name || unit.label || "Unknown"}
-                  </p>
-                  {unit.code && (
-                    <p className={`text-left text-[#ff2d78] ${isSelected && isAvailable && "text-black"}`}>
-                      {conversion.currency(Number(cat?.price || 0))} / Hari
-                    </p>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-12 h-12 border-2 border-b-4 border-r-4 !border-black text-white text-xl flex items-center justify-center rotate-4"
+                      style={{
+                        background: cat?.color || "#7b9cff",
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faMobileAlt} />
+                    </div>
+                    <div className="flex-grow">
+                      <p className={`font-extrabold uppercase ${isSelected && isAvailable ? "text-white" : "text-black"}`}>
+                        {cat.name || cat.code || "Unknown"}
+                      </p>
+                      <p className={`text-sm ${isSelected && isAvailable ? "text-white/80" : "text-[#ff2d78]"}`}>
+                        {conversion.currency(Number(cat.price || 0))} / Hari
+                      </p>
+                    </div>
+                    {!isAvailable && (
+                      <span
+                        className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-black text-white"
+                      >
+                        HABIS
+                      </span>
+                    )}
+                  </div>
                 </button>
               );
             })}

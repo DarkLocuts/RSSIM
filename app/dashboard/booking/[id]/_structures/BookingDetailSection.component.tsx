@@ -40,14 +40,17 @@ export function BookingDetailSectionComponent({ booking, onRefresh }: { booking:
             <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
               Informasi Pemesan
             </h3>
-            <ButtonComponent
-              icon={faEdit}
-              size="xs"
-              rounded
-              variant="outline"
-              onClick={() => setEditType("customer")}
-              label="Ubah Data"
-            />
+
+            {(booking.status !== "RETURNED") &&
+              <ButtonComponent
+                icon={faEdit}
+                size="xs"
+                rounded
+                variant="outline"
+                onClick={() => setEditType("customer")}
+                label="Ubah Data"
+              />
+            }
           </div>
           <div className="flex flex-col gap-3">
             <div className="flex items-start gap-3">
@@ -76,14 +79,16 @@ export function BookingDetailSectionComponent({ booking, onRefresh }: { booking:
             <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
               Unit Disewa
             </h3>
-            <ButtonComponent
-              icon={faEdit}
-              size="xs"
-              rounded
-              variant="outline"
-              onClick={() => setEditType("unit")}
-              label="Ubah Unit"
-            />
+            {(booking.status !== "RETURNED") &&
+              <ButtonComponent
+                icon={faEdit}
+                size="xs"
+                rounded
+                variant="outline"
+                onClick={() => setEditType("unit")}
+                label="Ubah Unit"
+              />
+            }
           </div>
           <div className="flex items-start gap-3">
             <UnitCategoryCardComponent data={booking.unit?.unit_category || null} />
@@ -95,14 +100,16 @@ export function BookingDetailSectionComponent({ booking, onRefresh }: { booking:
             <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
               Jadwal Sewa
             </h3>
-            <ButtonComponent
-              icon={faEdit}
-              size="xs"
-              rounded
-              variant="outline"
-              onClick={() => setEditType("schedule")}
-              label="Ubah Jadwal"
-            />
+            {(booking.status !== "RETURNED") &&
+              <ButtonComponent
+                icon={faEdit}
+                size="xs"
+                rounded
+                variant="outline"
+                onClick={() => setEditType("schedule")}
+                label="Ubah Jadwal"
+              />
+            }
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex items-start gap-3">
@@ -177,8 +184,8 @@ export function BookingDetailSectionComponent({ booking, onRefresh }: { booking:
         )}
       </div>
 
-      <BookingTakeSheet bookingId={booking.id} show={showCameraSheet} onClose={() => setShowCameraSheet(false)} type={booking.status === "ORDERED" ? "RENTED" : "RETURNED"} />
-      <BookingCancelSheet bookingId={booking.id} show={showCancelSheet} onClose={() => setShowCancelSheet(false)} />
+      <BookingTakeSheet bookingId={booking.id} show={showCameraSheet} onClose={() => setShowCameraSheet(false)} onSuccess={() => { if(onRefresh) onRefresh() }} type={booking.status === "ORDERED" ? "RENTED" : "RETURNED"} />
+      <BookingCancelSheet bookingId={booking.id} show={showCancelSheet} onClose={() => setShowCancelSheet(false)} onSuccess={() => { if(onRefresh) onRefresh() }} />
       <BookingEditSheet 
         booking={booking} 
         show={!!editType} 

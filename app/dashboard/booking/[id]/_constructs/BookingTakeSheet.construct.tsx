@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCamera, faCheckCircle, faImage } from "@fortawesome/free-solid-svg-icons";
 import { ButtonComponent, BottomSheetComponent } from "@/components";
 
-export function BookingTakeSheet({ bookingId, show, onClose, type }: { bookingId: string, show: boolean, onClose: () => void, type: "RENTED" | "RETURNED" }) {
+export function BookingTakeSheet({ bookingId, show, onClose, onSuccess, type }: { bookingId: string, show: boolean, onClose: () => void, onSuccess?: () => void, type: "RENTED" | "RETURNED" }) {
   const router = useRouter();
   
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -107,6 +107,7 @@ export function BookingTakeSheet({ bookingId, show, onClose, type }: { bookingId
     
     if (res?.status === 200 || res?.status === 201) {
       onClose();
+      if (onSuccess) onSuccess();
       router.refresh();
     }
     setSubmittingCamera(false);

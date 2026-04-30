@@ -161,6 +161,7 @@ export default function BookingPage() {
           controlBar={["CREATE", "SEARCH"]}
           detailControl={false}
           block
+          actionControl={false}
           responsiveControl={{
             mobile: {
               item: (row) => {

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@utils";
 import { ButtonComponent, BottomSheetComponent, InputComponent } from "@/components";
 
-export function BookingCancelSheet({ bookingId, show, onClose }: { bookingId: string, show: boolean, onClose: () => void }) {
+export function BookingCancelSheet({ bookingId, show, onClose, onSuccess }: { bookingId: string, show: boolean, onClose: () => void, onSuccess?: () => void }) {
   const router = useRouter();
   
   const [cancelNote, setCancelNote] = useState("");
@@ -27,6 +27,7 @@ export function BookingCancelSheet({ bookingId, show, onClose }: { bookingId: st
     if (res?.status === 200 || res?.status === 201) {
       setTimeout(() => { onClose() }, 500);
       setCancelNote("");
+      if (onSuccess) onSuccess();
       router.refresh();
     }
     setSubmittingCancel(false);

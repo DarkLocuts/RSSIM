@@ -181,7 +181,7 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
                     customer_contact  :  booking.customer_contact,
                     start_date        :  booking.start_date,
                     end_date          :  booking.end_date,
-                    unit_id           :  booking.unit_id
+                    unit_category_id  :  booking.unit_category_id
                   }}
                   onSuccess={() => {
                     fetchBooking();
@@ -235,7 +235,7 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
                       col: 12,
                       type: "custom",
                       construction: ({ formControl }) => <InputBookingComponent 
-                        type="date"
+                        type="datetime-local"
                         name="start_at" 
                         label="Tanggal Pengambilan" 
                         placeholder="Pilih tanggal mulai"
@@ -246,7 +246,7 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
                       col: 12,
                       type: "custom",
                       construction: ({ formControl }) => <InputBookingComponent 
-                        type="date"
+                        type="datetime-local"
                         name="end_at" 
                         label="Tanggal Pengembalian" 
                         placeholder="Pilih tanggal selesai"
@@ -257,15 +257,35 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
                       col: 12,
                       type: "custom",
                       construction: ({ formControl, setValues, values }) => {
+                        const startAt = values?.find((v: any) => v.name === "start_at")?.value;
+                        const endAt   = values?.find((v: any) => v.name === "end_at")?.value;
+
+                        if (!startAt || !endAt) {
+                          return (
+                            <div className="pb-2">
+                              <label className="font-bold uppercase tracking-wider text-black">
+                                PILIH IPHONE
+                              </label>
+                              <div
+                                className="mt-2 p-4 border-2 !border-black bg-[#fffbf0] text-center"
+                                style={{ fontSize: "12px", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}
+                              >
+                                Isi tanggal pengambilan &amp; pengembalian terlebih dahulu.
+                              </div>
+                            </div>
+                          );
+                        }
+
                         return (
                           <div className="pb-2">
                             <CustomerUnitListSelectorComponent
-                              value={formControl("unit_id").value}
-                              invalid={formControl("unit_id").invalid}
+                              value={formControl("unit_category_id").value}
+                              invalid={formControl("unit_category_id").invalid}
                               onChange={(val, price) => {
-                                setValues([ ...values.filter((v: any) => v.name != "unit_id" && v.name != "price"), { name: "unit_id", value: val }, { name: "price", value: price } ])
+                                setValues([ ...values.filter((v: any) => v.name != "unit_category_id" && v.name != "price"), { name: "unit_category_id", value: val }, { name: "price", value: price } ])
                               }}
-                              register={formControl("unit_id").register}
+                              register={formControl("unit_category_id").register}
+                              availableAt={`${startAt}|${endAt}`}
                             />
                           </div>
                         );
@@ -280,7 +300,7 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
                         let days = 0;
                         if (start && end && start <= end) {
                           const diffTime = Math.abs(end.getTime() - start.getTime());
-                          days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                          days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                         }
                         const price = values.find((v: any) => v?.name == "price")?.value || 0;
                         const total = days * price;
