@@ -1,13 +1,16 @@
 "use client"
 
 import { Suspense, useState } from "react";
-import { HeadbarComponent, IconButtonComponent, TableSupervisionComponent, ModalConfirmComponent, BottomSheetComponent, ButtonComponent, InputComponent, ToastComponent } from "@components";
+import { HeadbarComponent, IconButtonComponent, TableSupervisionComponent, ModalConfirmComponent, BottomSheetComponent, ButtonComponent, InputComponent, ToastComponent, InputCheckboxComponent } from "@components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UnitListSelectorComponent } from "./_constructs/UnitListSelector.construct";
-import { faCalendar, faCopy, faLink, faMoneyBill, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faCalendar, faCopy, faLink, faMobileAlt, faMoneyBill, faUser } from "@fortawesome/free-solid-svg-icons";
 import { BookingStatusComponent } from "./_constructs/booking-status.construct";
-import { conversion, api } from "@/utils";
+import { conversion, api, useResponsive } from "@/utils";
 import Link from "next/link";
+import { useAuthContext } from "@/contexts";
+
+
 
 export default function BookingPage() {
   const [showModal, setShowModal]      =  useState(false);
@@ -15,6 +18,15 @@ export default function BookingPage() {
   const [createdLink, setCreatedLink]  =  useState("");
   const [loadingLink, setLoadingLink]  =  useState(false);
   const [showToast, setShowToast]      =  useState(false);
+
+
+
+  const [dateStart, setDateStart] = useState(null);
+  const [dateEnd, setDateEnd] = useState(null);
+  const [filterCategory, setFilterCategory] = useState<any[]>([]);
+  const [filterOutlet, setFilterOutlet] = useState<any[]>([]);
+
+
 
   const handleCreateLink = async () => {
     setLoadingLink(true);
@@ -51,6 +63,16 @@ export default function BookingPage() {
         <TableSupervisionComponent
           fetchControl={{
             path: "bookings",
+            params: {
+              expand: ["unit", "unit.unit_category"],
+              filter: [
+                ...(filterCategory?.length > 0 ? [{ column: "unit.unit_category_id", type: "in", value: filterCategory }] : []),
+                ...(filterOutlet?.length > 0 ? [{ column: "outlet_id", type: "in", value: filterOutlet }] : [])
+              ] as any[]
+            },
+            includeParams: {
+              ...(dateStart && dateEnd ? { created_at: `${dateStart}|${dateEnd}` } : {})
+            }
           }}
           columnControl={[
             {
@@ -158,7 +180,7 @@ export default function BookingPage() {
               
             ]
           }}
-          controlBar={["CREATE", "SEARCH"]}
+          controlBar={["CREATE", "SEARCH", <FilterUnit key="filter-unit" dateStart={dateStart} dateEnd={dateEnd} setDateStart={setDateStart} setDateEnd={setDateEnd} setFilterCategory={setFilterCategory} setFilterOutlet={setFilterOutlet} />]}
           detailControl={false}
           block
           actionControl={false}
@@ -187,6 +209,12 @@ export default function BookingPage() {
                               <FontAwesomeIcon icon={faCalendar} className="text-xs text-primary" />
                             </div>
                             <p className="text-sm text-semibold line-clamp-1">{row.start_at ? conversion.date(row.start_at) : "-"} s/d {row.end_at ? conversion.date(row.end_at) : "-"}</p>
+                          </div>
+                          <div className="flex items-center gap-2 px-2">
+                            <div className="w-7 aspect-square flex items-center justify-center bg-blue-50 rounded-md">
+                              <FontAwesomeIcon icon={faMobileAlt} className="text-xs text-primary" />
+                            </div>
+                            <p className="text-sm text-semibold line-clamp-1">{row?.unit?.unit_category?.name} ({row?.unit?.code})</p>
                           </div>
                           <div className="flex items-center gap-2 px-2">
                             <div className="w-7 aspect-square flex items-center justify-center bg-yellow-50 rounded-md">
@@ -269,4 +297,63 @@ export default function BookingPage() {
       />
     </Suspense>
   );
+}
+
+
+
+const FilterUnit = ({ dateStart, dateEnd, setDateStart, setDateEnd, setFilterCategory, setFilterOutlet }: any) => {
+  const { isSm } = useResponsive();
+  const { user } = useAuthContext();
+
+  if(isSm) {
+    return (
+      <>
+        <div className="px-2 pb-20 w-full">
+          <p className="text-sm mb-2">Ketersediaan Unit</p>
+          <div className="flex flex-col gap-2 p-2 border rounded-lg">
+            <InputComponent
+              type="date"
+              label={"Dari"}
+              name="_start_date"
+              value={dateStart}
+              onChange={(v) => setDateStart(v)}
+              placeholder="YYYY-MM-DD"
+              className="md:py-1.5 md:text-sm"
+            />
+            <InputComponent
+              type="date"
+              label={"Sampai"}
+              name="_end_date"
+              value={dateEnd}
+              onChange={(v) => setDateEnd(v)}
+              placeholder="YYYY-MM-DD"
+              className="md:py-1.5 md:text-sm"
+            />
+          </div>
+
+          <InputCheckboxComponent
+            label="Jenis Unit"
+            name="_filter_category"
+            serverOptionControl={{ path: "unit-categories", params: {selectableOption: ["id", "name"]} }}
+            vertical
+            onChange={(v) => setFilterCategory(v)}
+            className="max-h-[300px] label::mt-4"
+          />
+
+          {user?.role_id == 1 && (
+            <InputCheckboxComponent
+              label="Outlet"
+              name="_filter_outlet"
+              serverOptionControl={{ path: "outlets", params: {selectableOption: ["id", "name"]} }}
+              vertical
+              onChange={(v) => setFilterOutlet(v)}
+              className="max-h-[300px] label::mt-4"
+            />
+          )}
+        </div>
+      </>
+    ) 
+  } else {
+    return <></>;
+  }
 }

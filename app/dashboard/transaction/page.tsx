@@ -1,14 +1,24 @@
 "use client"
 
-import { Suspense } from "react";
-import { HeadbarComponent, TableSupervisionComponent } from "@components";
+import { Suspense, useState } from "react";
+import { HeadbarComponent, InputCheckboxComponent, InputComponent, TableSupervisionComponent } from "@components";
+import { useAuthContext } from "@contexts";
+import { useResponsive } from "@utils";
 
 const typeLabels: Record<string, string> = {
   income:  "Pemasukan",
   expense: "Pengeluaran",
 };
 
+
+
 export default function TransactionPage() {
+  const { user } = useAuthContext();
+
+  const [dateStart, setDateStart] = useState(null);
+  const [dateEnd, setDateEnd] = useState(null);
+  const [filterOutlet, setFilterOutlet] = useState<any[]>([]);
+
   return (
     <Suspense>
       <div className="px-2">
@@ -17,7 +27,15 @@ export default function TransactionPage() {
         <TableSupervisionComponent
           fetchControl={{
             path: "transaction-specials",
-            params: { expand: ["user", "payment_method"] }
+            params: { 
+              expand: ["user", "payment_method"],
+              filter: [
+                ...(filterOutlet?.length > 0 ? [{ column: "outlet_id", type: "in", value: filterOutlet }] : [])
+              ] as any[]
+            },
+            includeParams: {
+              created_at: `${dateStart}|${dateEnd}`
+            }
           }}
           columnControl={[
             {
@@ -109,9 +127,19 @@ export default function TransactionPage() {
                   validations: ["required"]
                 }
               },
+              ...(user?.role_id == 1 ? [{
+                type: "select",
+                construction: {
+                  name                 :  "outlet_id",
+                  label                :  "Outlet",
+                  placeholder          :  "Pilih outlet",
+                  serverOptionControl  :  {path: "outlets", params: {selectableOption: ["id", "name"]}},
+                  validations          :  ["required"]
+                }
+              }] as any[] : []),
             ]
           }}
-          controlBar={["CREATE", "SEARCH"]}
+          controlBar={["CREATE", "SEARCH", , <FilterUnit key="filter-unit" dateStart={dateStart} dateEnd={dateEnd} setDateStart={setDateStart} setDateEnd={setDateEnd} setFilterOutlet={setFilterOutlet} />]}
           detailControl={false}
           block
           responsiveControl={{
@@ -141,4 +169,52 @@ export default function TransactionPage() {
       </div>
     </Suspense>
   );
+}
+
+const FilterUnit = ({ dateStart, dateEnd, setDateStart, setDateEnd, setFilterOutlet }: any) => {
+  const { isSm } = useResponsive();
+  const { user } = useAuthContext();
+
+  if(isSm) {
+    return (
+      <>
+        <div className="px-2 pb-20 w-full">
+          <p className="text-sm mb-2">Tanggal Transaksi</p>
+          <div className="flex flex-col gap-2 p-2 border rounded-lg">
+            <InputComponent
+              type="date"
+              label={"Dari"}
+              name="_start_date"
+              value={dateStart}
+              onChange={(v) => setDateStart(v)}
+              placeholder="YYYY-MM-DD"
+              className="md:py-1.5 md:text-sm"
+            />
+            <InputComponent
+              type="date"
+              label={"Sampai"}
+              name="_end_date"
+              value={dateEnd}
+              onChange={(v) => setDateEnd(v)}
+              placeholder="YYYY-MM-DD"
+              className="md:py-1.5 md:text-sm"
+            />
+          </div>
+
+          {user?.role_id == 1 && (
+            <InputCheckboxComponent
+              label="Outlet"
+              name="_filter_outlet"
+              serverOptionControl={{ path: "outlets", params: {selectableOption: ["id", "name"]} }}
+              vertical
+              onChange={(v) => setFilterOutlet(v)}
+              className="max-h-[300px] label::mt-4"
+            />
+          )}
+        </div>
+      </>
+    ) 
+  } else {
+    return <></>;
+  }
 }

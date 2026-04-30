@@ -106,9 +106,9 @@ export default function ProductPage() {
 
 
 
-
 const FilterUnit = ({ dateStart, dateEnd, setDateStart, setDateEnd, setFilterCategory, setFilterOutlet }: any) => {
   const { isSm } = useResponsive();
+  const { user } = useAuthContext();
 
   if(isSm) {
     return (
@@ -145,14 +145,16 @@ const FilterUnit = ({ dateStart, dateEnd, setDateStart, setDateEnd, setFilterCat
             className="max-h-[300px] label::mt-4"
           />
 
-          <InputCheckboxComponent
-            label="Outlet"
-            name="_filter_outlet"
-            serverOptionControl={{ path: "outlets", params: {selectableOption: ["id", "name"]} }}
-            vertical
-            onChange={(v) => setFilterOutlet(v)}
-            className="max-h-[300px] label::mt-4"
-          />
+          {user?.role_id == 1 && (
+            <InputCheckboxComponent
+              label="Outlet"
+              name="_filter_outlet"
+              serverOptionControl={{ path: "outlets", params: {selectableOption: ["id", "name"]} }}
+              vertical
+              onChange={(v) => setFilterOutlet(v)}
+              className="max-h-[300px] label::mt-4"
+            />
+          )}
         </div>
       </>
     ) 

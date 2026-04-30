@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useGetApi, conversion } from "@/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendar, faMoneyBill, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faCalendar, faMobileAlt, faMoneyBill, faUser } from "@fortawesome/free-solid-svg-icons";
 import { BookingStatusComponent } from "../../booking/_constructs/booking-status.construct";
 
 export function RecentBookingListComponent() {
   const { data: responseBody, loading } = useGetApi({
     path: "bookings",
-    params: { paginate: 5 }
+    params: { expand: ["unit", "unit.unit_category"], paginate: 5 }
   });
 
   const bookings = responseBody?.data?.data || responseBody?.data || [];
@@ -56,6 +56,12 @@ export function RecentBookingListComponent() {
                         <p className="text-sm font-semibold line-clamp-1">
                           {row.start_at ? conversion.date(row.start_at) : "-"} s/d {row.end_at ? conversion.date(row.end_at) : "-"}
                         </p>
+                      </div>
+                      <div className="flex items-center gap-2 px-2">
+                        <div className="w-7 aspect-square flex items-center justify-center bg-blue-50 rounded-md">
+                          <FontAwesomeIcon icon={faMobileAlt} className="text-xs text-primary" />
+                        </div>
+                        <p className="text-sm text-semibold line-clamp-1">{row?.unit?.unit_category?.name} ({row?.unit?.code})</p>
                       </div>
                       <div className="flex items-center gap-2 px-2">
                         <div className="w-7 aspect-square flex items-center justify-center bg-yellow-50 rounded-md">

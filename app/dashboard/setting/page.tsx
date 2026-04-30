@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBoxesStacked, faUsers, faBuilding, faChevronRight, faPen, faBook, faUserPen, faLock, faRightFromBracket, faCreditCard, faCalendarCheck } from "@fortawesome/free-solid-svg-icons";
+import { faBoxesStacked, faUsers, faBuilding, faChevronRight, faPen, faBook, faUserPen, faLock, faRightFromBracket, faCreditCard, faCalendarCheck, faBell } from "@fortawesome/free-solid-svg-icons";
 
 import { auth } from "@utils";
 import { ModalConfirmComponent, ToastComponent } from "@components";
@@ -102,6 +102,14 @@ export default function AkunPage() {
       onClick: () => setShowChangePassword(true),
       color: "text-warning",
       bg: "bg-amber-50",
+    },
+    {
+      icon: faBell,
+      label: "Notifikasi",
+      description: "Lihat notifikasi yang masuk",
+      onClick: () => router.push("/dashboard/notification"),
+      color: "text-violet-600",
+      bg: "bg-violet-50",
     },
     {
       icon: faRightFromBracket,
