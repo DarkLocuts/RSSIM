@@ -88,15 +88,22 @@ export default function PresencePage() {
           controlBar={["CREATE", "SEARCH"]}
           detailControl={(row) => {
             const storageHost = process.env.NEXT_PUBLIC_STORAGE_HOST;
-            const checkInImageUrl  = row?.check_in_image  ? `${storageHost}/${row.check_in_image}`  : null;
-            const checkOutImageUrl = row?.check_out_image ? `${storageHost}/${row.check_out_image}` : null;
+            const checkInImageUrl  = row?.check_in_image  ? `${storageHost}${row.check_in_image}`  : null;
+            const checkOutImageUrl = row?.check_out_image ? `${storageHost}${row.check_out_image}` : null;
 
-            const handleDownload = (url: string, filename: string) => {
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = filename;
-              a.target = "_blank";
-              a.click();
+            const handleDownload = async (url: string, filename: string) => {
+              try {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = blobUrl;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(blobUrl);
+              } catch {
+                window.open(url, "_blank");
+              }
             };
 
             return (
@@ -127,29 +134,29 @@ export default function PresencePage() {
                 {(checkInImageUrl || checkOutImageUrl) && (
                   <div className="flex flex-col gap-3">
                     <div className="text-xs font-semibold text-light-foreground uppercase tracking-wide">Foto Presensi</div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-4">
                       {/* Check In Photo */}
                       <div className="flex flex-col gap-1.5">
                         <div className="text-xs font-semibold text-on-surface-variant">Check In</div>
                         {checkInImageUrl ? (
-                          <div className="relative group rounded-xl overflow-hidden border bg-surface aspect-square">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={checkInImageUrl}
-                              alt="Foto Check In"
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <button
-                                onClick={() => handleDownload(checkInImageUrl, `check-in-${row?.date || "foto"}.jpg`)}
-                                className="bg-white text-on-surface text-xs font-semibold px-3 py-1.5 rounded-lg shadow hover:bg-surface transition"
-                              >
-                                Download
-                              </button>
+                          <div className="flex flex-col gap-2">
+                            <div className="rounded-xl overflow-hidden border bg-surface">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={checkInImageUrl}
+                                alt="Foto Check In"
+                                className="w-full h-auto object-contain"
+                              />
                             </div>
+                            <button
+                              onClick={() => handleDownload(checkInImageUrl, `check-in-${row?.date || "foto"}.jpg`)}
+                              className="w-full bg-primary/10 text-primary text-xs font-semibold px-3 py-2 rounded-lg hover:bg-primary/20 transition text-center"
+                            >
+                              Download Foto Check In
+                            </button>
                           </div>
                         ) : (
-                          <div className="rounded-xl border bg-surface aspect-square flex items-center justify-center text-xs text-light-foreground">
+                          <div className="rounded-xl border bg-surface py-6 flex items-center justify-center text-xs text-light-foreground">
                             Tidak ada foto
                           </div>
                         )}
@@ -159,24 +166,24 @@ export default function PresencePage() {
                       <div className="flex flex-col gap-1.5">
                         <div className="text-xs font-semibold text-on-surface-variant">Check Out</div>
                         {checkOutImageUrl ? (
-                          <div className="relative group rounded-xl overflow-hidden border bg-surface aspect-square">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={checkOutImageUrl}
-                              alt="Foto Check Out"
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <button
-                                onClick={() => handleDownload(checkOutImageUrl, `check-out-${row?.date || "foto"}.jpg`)}
-                                className="bg-white text-on-surface text-xs font-semibold px-3 py-1.5 rounded-lg shadow hover:bg-surface transition"
-                              >
-                                Download
-                              </button>
+                          <div className="flex flex-col gap-2">
+                            <div className="rounded-xl overflow-hidden border bg-surface">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={checkOutImageUrl}
+                                alt="Foto Check Out"
+                                className="w-full h-auto object-contain"
+                              />
                             </div>
+                            <button
+                              onClick={() => handleDownload(checkOutImageUrl, `check-out-${row?.date || "foto"}.jpg`)}
+                              className="w-full bg-primary/10 text-primary text-xs font-semibold px-3 py-2 rounded-lg hover:bg-primary/20 transition text-center"
+                            >
+                              Download Foto Check Out
+                            </button>
                           </div>
                         ) : (
-                          <div className="rounded-xl border bg-surface aspect-square flex items-center justify-center text-xs text-light-foreground">
+                          <div className="rounded-xl border bg-surface py-6 flex items-center justify-center text-xs text-light-foreground">
                             Tidak ada foto
                           </div>
                         )}

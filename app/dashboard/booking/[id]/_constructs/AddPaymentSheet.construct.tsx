@@ -33,6 +33,14 @@ export function AddPaymentSheetComponent({ show, onClose, bookingId, onSuccess }
           })}
           fields={[
             {
+              construction: {
+                name         :  "note",
+                label        :  "Keterangan",
+                placeholder  :  "Keterangan",
+                validations  :  ["required"],
+              },
+            },
+            {
               type: "currency",
               construction: {
                 name         :  "amount",
@@ -49,13 +57,6 @@ export function AddPaymentSheetComponent({ show, onClose, bookingId, onSuccess }
                 placeholder         :  "Pilih metode pembayaran",
                 serverOptionControl :  { path: "payment-methods", params: { selectableOption: ["id", "name"] } },
                 validations         :  ["required"],
-              },
-            },
-            {
-              construction: {
-                name         :  "note",
-                label        :  "Keterangan",
-                placeholder  :  "Keterangan (opsional)",
               },
             },
           ]}

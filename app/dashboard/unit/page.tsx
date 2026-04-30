@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { HeadbarComponent, InputCheckboxComponent, InputComponent, TableSupervisionComponent } from "@components";
-import { UnitStatusComponent } from "@app";
+import { UnitStatusComponent } from "./_constructs/unit-status.construct";
 import UnitCategoryCardComponent from "../category/_constructs/UnitCategoryCard.component";
 import { useAuthContext } from "@/contexts";
 import { useResponsive } from "@/utils";

@@ -8,7 +8,8 @@ import { faBoxesStacked, faUsers, faBuilding, faChevronRight, faPen, faBook, faU
 
 import { auth } from "@utils";
 import { ModalConfirmComponent, ToastComponent } from "@components";
-import { UpdateProfileComponent, UpdatePasswordComponent } from "@app";
+import { UpdateProfileComponent } from "./_structures/UpdateProfile.component";
+import { UpdatePasswordComponent } from "./_structures/UpdatePassword.component";
 import { useAuthContext } from "@/contexts";
 
 

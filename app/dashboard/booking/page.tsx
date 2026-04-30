@@ -177,7 +177,6 @@ export default function BookingPage() {
                   );
                 }
               },
-              
             ]
           }}
           controlBar={["CREATE", "SEARCH", <FilterUnit key="filter-unit" dateStart={dateStart} dateEnd={dateEnd} setDateStart={setDateStart} setDateEnd={setDateEnd} setFilterCategory={setFilterCategory} setFilterOutlet={setFilterOutlet} />]}

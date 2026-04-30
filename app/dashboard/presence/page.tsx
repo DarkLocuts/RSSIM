@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faCamera, faCheckCircle, faCheckDouble } from "@fortawesome/free-solid-svg-icons"
 
 import { HeadbarComponent, ButtonComponent } from "@components"
-import { PresenceClockComponent } from "@app"
+import { PresenceClockComponent } from "./_constructs/PresenceClock.component";
 import { api } from "@utils"
 import { useAuthContext } from "@contexts"
 import { useRouter } from "next/navigation"

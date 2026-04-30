@@ -17,7 +17,7 @@ export function BookingCancelSheet({ bookingId, show, onClose, onSuccess }: { bo
     
     const res = await api({
       path: `bookings/${bookingId}/update-status`,
-      method: "PUT",
+      method: "POST",
       payload: {
         status: "CANCELED",
         note: cancelNote
