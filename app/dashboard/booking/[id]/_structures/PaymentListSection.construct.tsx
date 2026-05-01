@@ -121,7 +121,7 @@ export function PaymentListSectionComponent({ booking, payments, onAddCharge, on
           onClick={onAddPayment}
           block
           rounded
-          disabled={booking.status !== "CANCELED"}
+          disabled={booking.status === "CANCELED"}
         />
       </div>
 
