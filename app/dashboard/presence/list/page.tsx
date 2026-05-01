@@ -19,12 +19,14 @@ export default function PresencePage() {
             {
               selector: "employee",
               label: "Karyawan",
-              sortable: true
+              sortable: true,
+              item: r => r?.user?.name
             },
             {
               selector: "date",
               label: "Tanggal",
-              sortable: true
+              sortable: true,
+              item: r => conversion.date(r.date, "DD MMMM YYYY")
             },
             {
               selector: "check_in",

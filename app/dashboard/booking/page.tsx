@@ -9,10 +9,12 @@ import { BookingStatusComponent } from "./_constructs/booking-status.construct";
 import { conversion, api, useResponsive } from "@/utils";
 import Link from "next/link";
 import { useAuthContext } from "@/contexts";
+import { useRouter } from "next/navigation";
 
 
 
 export default function BookingPage() {
+  const router = useRouter()
   const [showModal, setShowModal]      =  useState(false);
   const [showSheet, setShowSheet]      =  useState(false);
   const [createdLink, setCreatedLink]  =  useState("");
@@ -66,12 +68,12 @@ export default function BookingPage() {
             params: {
               expand: ["unit", "unit.unit_category"],
               filter: [
-                ...(filterCategory?.length > 0 ? [{ column: "unit.unit_category_id", type: "in", value: filterCategory }] : []),
                 ...(filterOutlet?.length > 0 ? [{ column: "outlet_id", type: "in", value: filterOutlet }] : [])
               ] as any[]
             },
             includeParams: {
-              ...(dateStart && dateEnd ? { created_at: `${dateStart}|${dateEnd}` } : {})
+              ...(dateStart && dateEnd ? { booking_at: `${dateStart}|${dateEnd}` } : {}),
+              ...(filterCategory?.length > 0 ? { unit_category_id: filterCategory.join(",") } : [])
             }
           }}
           columnControl={[
@@ -86,26 +88,33 @@ export default function BookingPage() {
               sortable: true
             },
             {
-              selector: "start_date",
+              selector: "start_at",
               label: "Tanggal Mulai",
-              sortable: true
+              sortable: true,
+              item: (r) => r.start_at ? conversion.date(r.start_at) : "-",
             },
             {
-              selector: "end_date",
+              selector: "end_at",
               label: "Tanggal Selesai",
-              sortable: true
+              sortable: true,
+              item: (r) => r.end_at ? conversion.date(r.end_at) : "-",
             },
             {
-              selector: "total_bill",
+              selector: "total",
               label: "Total Tagihan",
-              item: (r) => r.total_bill ? `Rp ${Number(r.total_bill).toLocaleString("id-ID")}` : "-",
+              item: (r) => r.total ? conversion.currency(r.total) : "-",
               sortable: true
             },
             {
               selector: "total_paid",
               label: "Total Bayar",
-              item: (r) => r.total_paid ? `Rp ${Number(r.total_paid).toLocaleString("id-ID")}` : "-",
+              item: (r) => r.total_paid ? conversion.currency(r.total_paid) : "-",
               sortable: true
+            },
+            {
+              selector: "status",
+              label: "Status",
+              item: (r) => <BookingStatusComponent status={r.status} />
             },
           ]}
           formControl={{
@@ -179,8 +188,15 @@ export default function BookingPage() {
               },
             ]
           }}
-          controlBar={["CREATE", "SEARCH", <FilterUnit key="filter-unit" dateStart={dateStart} dateEnd={dateEnd} setDateStart={setDateStart} setDateEnd={setDateEnd} setFilterCategory={setFilterCategory} setFilterOutlet={setFilterOutlet} />]}
+          controlBar={[
+            "CREATE",
+            "SEARCH",
+            <ButtonComponent key="link" icon={faLink} label="Buat Link" size="sm" className="hidden md:flex" variant="outline" />,
+            <FilterUnit key="filter-unit" dateStart={dateStart} dateEnd={dateEnd} setDateStart={setDateStart} setDateEnd={setDateEnd} setFilterCategory={setFilterCategory} setFilterOutlet={setFilterOutlet} />]}
           detailControl={false}
+          onRowClick={(row) => {
+            router.push(`/dashboard/booking/${row.id}`);
+          }}
           block
           actionControl={false}
           responsiveControl={{
@@ -235,7 +251,7 @@ export default function BookingPage() {
 
       <IconButtonComponent
         icon={faLink}
-        className="fixed bottom-40 right-5 w-12 h-12 z-50 bg-secondary transform active:scale-95 transition-transform"
+        className="md:hidden fixed bottom-40 right-5 w-12 h-12 z-50 bg-secondary transform active:scale-95 transition-transform"
         size="md"
         rounded
         onClick={() => setShowModal(true)}

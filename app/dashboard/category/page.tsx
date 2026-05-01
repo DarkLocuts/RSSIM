@@ -27,15 +27,15 @@ export default function CategoryPage() {
               sortable: true
             },
             {
-              selector: "identity_color",
+              selector: "color",
               label: "Warna",
               item: (r) => (
                 <div className="flex items-center gap-2">
                   <span
                     className="w-5 h-5 rounded-full inline-block border border-gray-200"
-                    style={{ backgroundColor: r.identity_color || "#ccc" }}
+                    style={{ backgroundColor: r.color || "#ccc" }}
                   />
-                  <span className="text-xs">{r.identity_color || "-"}</span>
+                  <span className="text-xs">{r.color || "-"}</span>
                 </div>
               ),
             },

@@ -39,16 +39,9 @@ export default function TransactionPage() {
           }}
           columnControl={[
             {
-              selector: "type",
-              label: "Tipe",
-              item: (r) => {
-                return (
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${r?.type == "income" ? "bg-success" : "bg-danger"}`}>
-                    {typeLabels[r.type] || r.type || "-"}
-                  </span>
-                );
-              },
-              sortable: true
+              selector: "description",
+              label: "Keterangan",
+              sortable: false
             },
             {
               selector: "amount",
@@ -64,14 +57,10 @@ export default function TransactionPage() {
               sortable: true
             },
             {
-              selector: "description",
-              label: "Keterangan",
-              sortable: false
-            },
-            {
               selector: "by",
               label: "Oleh",
-              sortable: true
+              sortable: true,
+              item: r => r?.user?.name
             },
           ]}
           formControl={{
