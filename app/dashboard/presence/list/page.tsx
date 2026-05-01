@@ -8,7 +8,7 @@ export default function PresencePage() {
   return (
     <Suspense>
       <div className="px-2">
-        <HeadbarComponent title="Absensi" />
+        <HeadbarComponent title="Kehadiran Karyawan" />
 
         <TableSupervisionComponent
           fetchControl={{
@@ -132,12 +132,12 @@ export default function PresencePage() {
 
                 {/* ── Photo previews ── */}
                 {(checkInImageUrl || checkOutImageUrl) && (
-                  <div className="flex flex-col gap-3">
-                    <div className="text-xs font-semibold text-light-foreground uppercase tracking-wide">Foto Presensi</div>
-                    <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <div className="text-xs font-semibold text-light-foreground">Foto</div>
+                    <div className="grid grid-cols-2 gap-2">
                       {/* Check In Photo */}
                       <div className="flex flex-col gap-1.5">
-                        <div className="text-xs font-semibold text-on-surface-variant">Check In</div>
+                        <div className="text-xs font-semibold text-on-surface-variant">Masuk</div>
                         {checkInImageUrl ? (
                           <div className="flex flex-col gap-2">
                             <div className="rounded-xl overflow-hidden border bg-surface">
@@ -152,7 +152,7 @@ export default function PresencePage() {
                               onClick={() => handleDownload(checkInImageUrl, `check-in-${row?.date || "foto"}.jpg`)}
                               className="w-full bg-primary/10 text-primary text-xs font-semibold px-3 py-2 rounded-lg hover:bg-primary/20 transition text-center"
                             >
-                              Download Foto Check In
+                              Download
                             </button>
                           </div>
                         ) : (
@@ -164,7 +164,7 @@ export default function PresencePage() {
 
                       {/* Check Out Photo */}
                       <div className="flex flex-col gap-1.5">
-                        <div className="text-xs font-semibold text-on-surface-variant">Check Out</div>
+                        <div className="text-xs font-semibold text-on-surface-variant">Pulang</div>
                         {checkOutImageUrl ? (
                           <div className="flex flex-col gap-2">
                             <div className="rounded-xl overflow-hidden border bg-surface">
@@ -179,7 +179,7 @@ export default function PresencePage() {
                               onClick={() => handleDownload(checkOutImageUrl, `check-out-${row?.date || "foto"}.jpg`)}
                               className="w-full bg-primary/10 text-primary text-xs font-semibold px-3 py-2 rounded-lg hover:bg-primary/20 transition text-center"
                             >
-                              Download Foto Check Out
+                              Download
                             </button>
                           </div>
                         ) : (

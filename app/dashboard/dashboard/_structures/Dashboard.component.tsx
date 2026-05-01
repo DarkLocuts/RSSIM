@@ -16,13 +16,14 @@ export function DashboardComponent() {
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-base font-bold">Ringkasan Hari Ini</h2>
       </div>
-      <div className="grid grid-cols-2 gap-2 mb-2">
+      <div className="grid grid-cols-2">
         <DashboardCardComponent 
           title="Semua Unit"
           value={loading ? "..." : String(summary.total_units || 0)}
           icon={faMobilePhone}
           iconBgColor='bg-blue-50'
           iconColor='text-blue-500'
+          className='rounded-none rounded-tl-xl'
         />
 
         <DashboardCardComponent 
@@ -31,6 +32,7 @@ export function DashboardComponent() {
           icon={faMobileAlt}
           iconBgColor='bg-green-50'
           iconColor='text-green-500'
+          className='rounded-none rounded-tr-xl'
         />
       </div>
 
@@ -38,15 +40,17 @@ export function DashboardComponent() {
         title="Pesanan Aktif"
         value={loading ? "..." : `${summary.active_bookings || 0} Pesanan`}
         icon={faClipboardList}
+        className='rounded-none border-y-0'
       />
 
-      <div className="grid grid-cols-2 gap-2 mb-4 mt-2">
+      <div className="grid grid-cols-2 mb-4">
         <DashboardCardComponent 
           title="Dipesan"
           value={loading ? "..." : String(summary.status_booked || 0)}
           icon={faClipboard}
           iconBgColor='bg-amber-50'
           iconColor='text-warning'
+          className='rounded-none rounded-bl-xl'
         />
         <DashboardCardComponent 
           title="Berjalan"
@@ -54,6 +58,7 @@ export function DashboardComponent() {
           icon={faClipboardCheck}
           iconBgColor='bg-green-50'
           iconColor='text-green-500'
+          className='rounded-none rounded-br-xl'
         />
       </div>
     </>

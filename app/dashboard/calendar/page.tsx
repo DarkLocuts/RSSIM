@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useGetApi } from "@utils";
+import Link from "next/link";
 
 const DAYS    =  ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 const MONTHS  =  ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -206,7 +207,7 @@ export default function CalenderPage() {
         {weeks.map((week, weekIdx) => {
           const { segments, maxRow }  =  weekLayouts[weekIdx];
           const visibleRows           =  maxRow + 1;
-          const eventAreaHeight       =  visibleRows * 18;
+          const eventAreaHeight       =  visibleRows * 26;
           const totalHeight           =  40 + eventAreaHeight + 4;
 
           return (
@@ -240,30 +241,31 @@ export default function CalenderPage() {
               {segments.map((seg) => {
                   const leftPct   =  (seg.colStart / 7) * 100;
                   const widthPct  =  (seg.colSpan / 7) * 100;
-                  const top       =  34 + seg.row * 18;
+                  const top       =  34 + seg.row * 26;
 
                   return (
-                    <div
-                      key={`${seg.event.id}-w${weekIdx}`}
-                      className="absolute overflow-hidden"
-                      style={{
-                        left: `calc(${leftPct}% + 1px)`,
-                        width: `calc(${widthPct}% - 2px)`,
-                        top,
-                        height: 16,
-                        backgroundColor: seg.event.unit_category_color,
-                        borderRadius: 3,
-                        display: "flex",
-                        alignItems: "center",
-                        paddingLeft: 4,
-                        paddingRight: 2,
-                      }}
-                      title={seg.event.unit_name}
-                    >
-                      <span className="font-semibold truncate text-white text-xs line-clamp-1">
-                        {seg.isContinuation ? "" : seg.event.unit_name}
-                      </span>
-                    </div>
+                    <Link href={`/dashboard/booking/${seg.event.id}`} key={`${seg.event.id}-w${weekIdx}`}>
+                      <div
+                        className="absolute overflow-hidden"
+                        style={{
+                          left: `calc(${leftPct}% + 1px)`,
+                          width: `calc(${widthPct}% - 2px)`,
+                          top,
+                          height: 24,
+                          backgroundColor: seg.event.unit_category_color,
+                          borderRadius: 0,
+                          display: "flex",
+                          alignItems: "center",
+                          paddingLeft: 6,
+                          paddingRight: 6,
+                        }}
+                        title={seg.event.unit_name}
+                      >
+                        <span className="font-semibold truncate text-white text-xs line-clamp-1">
+                          {seg.isContinuation ? "" : seg.event.unit_name}
+                        </span>
+                      </div>
+                    </Link>
                   );
                 })}
             </div>

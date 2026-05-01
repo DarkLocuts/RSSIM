@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import { HeadbarComponent, IconButtonComponent, TableSupervisionComponent, ModalConfirmComponent, BottomSheetComponent, ButtonComponent, InputComponent, ToastComponent, InputCheckboxComponent } from "@components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UnitListSelectorComponent } from "./_constructs/UnitListSelector.construct";
-import { faCalendar, faCopy, faLink, faMobileAlt, faMoneyBill, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faLink, faMobileAlt } from "@fortawesome/free-solid-svg-icons";
 import { BookingStatusComponent } from "./_constructs/booking-status.construct";
 import { conversion, api, useResponsive } from "@/utils";
 import Link from "next/link";
@@ -191,36 +191,37 @@ export default function BookingPage() {
                     <div className="border bg-white rounded-lg flex items-center gap-2 transition-colors w-full">
                       <div className="w-full">
                         <div className="flex items-center justify-between gap-2 mb-2 p-2 border-b">
-                          <span className="text-xs font-semibold text-light-foreground bg-gray-100 px-1.5 py-0.5 rounded">
-                            #{row.number || "-"}
-                          </span>
+                          <div>
+                            <div className="text-xs font-semibold">#{row.number || "-"}</div>
+                            <div className="text-[10px]">{row.start_at && row.end_at ? `${conversion.date(row.start_at)} s/d ${conversion.date(row.end_at)}` : ""}</div>
+                          </div>
                           <BookingStatusComponent status={row.status || "DRAFT"} size="xs" />
                         </div>
-                        <div className="space-y-1 pb-2">
-                          <div className="flex items-center gap-2 px-2">
-                            <div className="w-7 aspect-square flex items-center justify-center bg-gray-50 rounded-md">
-                              <FontAwesomeIcon icon={faUser} className="text-xs text-foreground" />
-                            </div>
-                            <p className="text-sm text-semibold line-clamp-1">{row.customer_name || "-"} ({row.customer_contact || "-"})</p>
+                        <div className="pt-1 pb-3">
+                          <div className="flex justify-between">
+                            {row?.unit ? (
+                              <div className="flex items-center gap-3 px-2">
+                                <div className="w-8 aspect-square flex items-center justify-center rounded-full" style={{ backgroundColor: row?.unit?.unit_category?.color || "" }}>
+                                  <FontAwesomeIcon icon={faMobileAlt} className="text-sm text-white" />
+                                </div>
+                                <div>
+                                  <p className="text-[9px]">{row?.unit?.code}</p>
+                                  <p className="text-sm font-semibold -mt-0.5">{row?.unit?.unit_category?.name}</p>
+                                </div>
+                              </div>
+                            ) : <div className="text-center w-full text-xs text-light-foreground">Belum ada informasi</div>}
+
+                            {row.customer_name && (
+                              <div className="text-right pr-2">
+                                <p className="text-[9px]">{row.customer_contact || "-"}</p>
+                                <p className="text-sm font-semibold -mt-0.5">{row.customer_name || "-"}</p>
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-2 px-2">
-                            <div className="w-7 aspect-square flex items-center justify-center bg-blue-50 rounded-md">
-                              <FontAwesomeIcon icon={faCalendar} className="text-xs text-primary" />
-                            </div>
-                            <p className="text-sm text-semibold line-clamp-1">{row.start_at ? conversion.date(row.start_at) : "-"} s/d {row.end_at ? conversion.date(row.end_at) : "-"}</p>
-                          </div>
-                          <div className="flex items-center gap-2 px-2">
-                            <div className="w-7 aspect-square flex items-center justify-center bg-blue-50 rounded-md">
-                              <FontAwesomeIcon icon={faMobileAlt} className="text-xs text-primary" />
-                            </div>
-                            <p className="text-sm text-semibold line-clamp-1">{row?.unit?.unit_category?.name} ({row?.unit?.code})</p>
-                          </div>
-                          <div className="flex items-center gap-2 px-2">
-                            <div className="w-7 aspect-square flex items-center justify-center bg-yellow-50 rounded-md">
-                              <FontAwesomeIcon icon={faMoneyBill} className="text-xs text-warning" />
-                            </div>
-                            <p className="text-sm text-semibold line-clamp-1">Tagihan: {conversion.currency(row.total || 0)} | Dibayar: {conversion.currency(row.total_paid || 0)}</p>
-                          </div>
+                        </div>
+                        <div className="px-2 py-2 border-t">
+                          <p className="text-xs font-semibold">{row.total ? conversion.currency(row.total || 0) : "-"}</p>
+                          <p className="text-[10px]">Terbayar: <span className="font-semibold">{row.total ? conversion.currency(row.total_paid || 0) : "-"}</span></p>
                         </div>
                       </div>
                     </div>
@@ -262,7 +263,7 @@ export default function BookingPage() {
             </div>
             <h6 className="font-bold text-lg text-center text-foreground">Link Pemesanan</h6>
             <p className="text-sm text-center text-light-foreground leading-relaxed">
-              Pesanan kosong berhasil dibuat. Silakan salin link di bawah ini dan bagikan kepada pelanggan.
+              Link pesanan berhasil dibuat. Silakan salin link di bawah ini dan bagikan kepada pelanggan.
             </p>
           </div>
           
