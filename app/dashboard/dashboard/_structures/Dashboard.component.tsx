@@ -3,6 +3,7 @@
 import { DashboardCardComponent } from '@/components'
 import { faClipboard, faClipboardCheck, faClipboardList, faMobileAlt, faMobilePhone } from "@fortawesome/free-solid-svg-icons";
 import { useGetApi } from "@utils";
+import Link from "next/link";
 
 export function DashboardComponent() {
   const { data: responseBody, loading } = useGetApi({
@@ -17,49 +18,59 @@ export function DashboardComponent() {
         <h2 className="text-base font-bold">Ringkasan Hari Ini</h2>
       </div>
       <div className="grid grid-cols-2">
-        <DashboardCardComponent 
-          title="Semua Unit"
-          value={loading ? "..." : String(summary.total_units || 0)}
-          icon={faMobilePhone}
-          iconBgColor='bg-blue-50'
-          iconColor='text-blue-500'
-          className='rounded-none rounded-tl-xl'
-        />
+        <Link href="/dashboard/unit">
+          <DashboardCardComponent 
+            title="Semua Unit"
+            value={loading ? "..." : String(summary.total_units || 0)}
+            icon={faMobilePhone}
+            iconBgColor='bg-blue-50'
+            iconColor='text-blue-500'
+            className='rounded-none rounded-tl-xl'
+          />
+        </Link>
 
-        <DashboardCardComponent 
-          title="Unit Tersedia"
-          value={loading ? "..." : String(summary.available_units || 0)}
-          icon={faMobileAlt}
-          iconBgColor='bg-green-50'
-          iconColor='text-green-500'
-          className='rounded-none rounded-tr-xl'
-        />
+        <Link href="/dashboard/unit">
+          <DashboardCardComponent 
+            title="Unit Tersedia"
+            value={loading ? "..." : String(summary.available_units || 0)}
+            icon={faMobileAlt}
+            iconBgColor='bg-green-50'
+            iconColor='text-green-500'
+            className='rounded-none rounded-tr-xl'
+          />
+        </Link>
       </div>
 
-      <DashboardCardComponent
-        title="Pesanan Aktif"
-        value={loading ? "..." : `${summary.active_bookings || 0} Pesanan`}
-        icon={faClipboardList}
-        className='rounded-none border-y-0'
-      />
+      <Link href="/dashboard/booking">
+        <DashboardCardComponent
+          title="Pesanan Aktif"
+          value={loading ? "..." : `${summary.active_bookings || 0} Pesanan`}
+          icon={faClipboardList}
+          className='rounded-none border-y-0'
+        />
+      </Link>
 
       <div className="grid grid-cols-2 mb-4">
-        <DashboardCardComponent 
-          title="Dipesan"
-          value={loading ? "..." : String(summary.status_booked || 0)}
-          icon={faClipboard}
-          iconBgColor='bg-amber-50'
-          iconColor='text-warning'
-          className='rounded-none rounded-bl-xl'
-        />
-        <DashboardCardComponent 
-          title="Berjalan"
-          value={loading ? "..." : String(summary.status_ongoing || 0)}
-          icon={faClipboardCheck}
-          iconBgColor='bg-green-50'
-          iconColor='text-green-500'
-          className='rounded-none rounded-br-xl'
-        />
+        <Link href="/dashboard/booking">
+          <DashboardCardComponent 
+            title="Dipesan"
+            value={loading ? "..." : String(summary.status_booked || 0)}
+            icon={faClipboard}
+            iconBgColor='bg-amber-50'
+            iconColor='text-warning'
+            className='rounded-none rounded-bl-xl'
+          />
+        </Link>
+        <Link href="/dashboard/booking">
+          <DashboardCardComponent 
+            title="Berjalan"
+            value={loading ? "..." : String(summary.status_ongoing || 0)}
+            icon={faClipboardCheck}
+            iconBgColor='bg-green-50'
+            iconColor='text-green-500'
+            className='rounded-none rounded-br-xl'
+          />
+        </Link>
       </div>
     </>
   )

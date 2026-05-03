@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBoxesStacked, faUsers, faBuilding, faChevronRight, faPen, faBook, faUserPen, faLock, faRightFromBracket, faCreditCard, faCalendarCheck, faBell } from "@fortawesome/free-solid-svg-icons";
+import { faBoxesStacked, faUsers, faBuilding, faChevronRight, faPen, faBook, faUserPen, faLock, faRightFromBracket, faCreditCard, faCalendarCheck, faBell, faChartLine } from "@fortawesome/free-solid-svg-icons";
 
 import { auth } from "@utils";
 import { ModalConfirmComponent, ToastComponent } from "@components";
@@ -49,6 +49,14 @@ export default function AkunPage() {
       bg: "bg-teal-50",
     },
     {
+      icon: faBook,
+      label: "Syarat & Ketentuan",
+      description: "Atur S&K penyewaan",
+      href: "/dashboard/setting/terms",
+      color: "text-orange-600",
+      bg: "bg-orange-50",
+    },
+    {
       icon: faUsers,
       label: "Akun / Karyawan",
       description: "Kelola akun dan hak akses",
@@ -83,6 +91,14 @@ export default function AkunPage() {
       href: "/dashboard/report",
       color: "text-primary",
       bg: "bg-blue-50",
+    },
+    {
+      icon: faChartLine,
+      label: "Statistik & Tren",
+      description: "Lihat grafik keuangan & tren unit",
+      href: "/dashboard/report/chart",
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
     },
   ];
 
@@ -188,6 +204,8 @@ export default function AkunPage() {
           ))}
         </div>
       </div>
+
+
 
       <div>
         <div className="flex items-center gap-2 mb-2 px-1 mt-8">

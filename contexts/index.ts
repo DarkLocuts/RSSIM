@@ -4,5 +4,6 @@
 
 export * from "./AppProvider";
 export * from "./Auth.context";
+export * from "./PresenceGuard.context";
 export * from "./PrintQr.context";
 export * from "./Toggle.context";

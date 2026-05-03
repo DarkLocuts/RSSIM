@@ -72,3 +72,5 @@ h-9
 
 
 text-[#ff2d78]
+bg-[#ff2d78]
+hover:text-[#ff2d78]

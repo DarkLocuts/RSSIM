@@ -4,6 +4,8 @@ import { useAuthContext } from "@/contexts";
 import { AttendanceComponent } from "./_structures/Attendance.component";
 import { DashboardComponent } from "./_structures/Dashboard.component";
 import { RecentBookingListComponent } from "./_structures/RecentBookingList.component";
+import { TodayBookingListComponent } from "./_structures/TodayBookingList.component";
+import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 
 export default function HomePage() {
   const { user } = useAuthContext()
@@ -19,6 +21,9 @@ export default function HomePage() {
       <DashboardComponent />
 
       <RecentBookingListComponent />
+
+      <TodayBookingListComponent type="pickup" title="Diambil Hari Ini" icon={faArrowDown} />
+      <TodayBookingListComponent type="return" title="Dikembalikan Hari Ini" icon={faArrowUp} />
     </div>
   );
 }

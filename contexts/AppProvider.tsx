@@ -3,10 +3,12 @@ import {
   AuthContextProvider, 
   ToggleContextProvider, 
   PrintQrContextProvider,
+  PresenceGuardContextProvider
 } from '@contexts'
 
 const registerProviders = [
   AuthContextProvider,
+  PresenceGuardContextProvider,
   ToggleContextProvider,
   PrintQrContextProvider
 ]

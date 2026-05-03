@@ -2,14 +2,13 @@
 
 import { ReactNode } from "react";
 import { BottombarComponent, SidebarComponent, SidebarContentComponent } from "@/components";
-import { usePathname } from "next/navigation";
 import { faBoxesStacked, faBuilding, faCalendarCheck, faCalendarDay, faCreditCard, faFileLines, faHome, faMobileScreen, faPen, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
 export default function RentalLayout({ children }: { children: ReactNode }) {
-  const pathname       =  usePathname();
-  const hideBottombar  =  pathname !== "/dashboard/booking" && pathname.startsWith("/dashboard/booking");
+  // const pathname       =  usePathname();
+  // const hideBottombar  =  pathname !== "/dashboard/booking" && pathname.startsWith("/dashboard/booking");
 
   return (
     <>
@@ -113,7 +112,7 @@ export default function RentalLayout({ children }: { children: ReactNode }) {
         </SidebarContentComponent>
       </div>
 
-      {!hideBottombar && <div className="block md:hidden"><BottombarComponent /></div>}
+      <div className="block md:hidden"><BottombarComponent /></div>
     </>
   );
 }

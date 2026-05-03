@@ -463,18 +463,22 @@ export function SelectComponent({
 
         {!!dataOptions?.length && showOption && !loadingOption && !!filteredOptions?.length && (
             <div>
-              <ul className={`input-suggest-container scroll-sm ${inputHandler.focus ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0"}`}>
+              <ul className={cn(`input-suggest-container scroll-sm ${inputHandler.focus ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0"}`, pcn(className, "suggest"))}>
                 {(newOption ? [newOption, ...filteredOptions] : filteredOptions ).map((option, key) => {
                   const selected = !!((typeof inputHandler.value == "string" || typeof inputHandler.value == "number") && inputHandler.value == option.value) ||
                     (Array.isArray(inputHandler.value) && Array().concat(inputHandler.value).find((val: string | number) => val == option.value));
-
+                  console.log(pcn(className, "suggest-item", "hover").split(" ").map((c) => "hover:" + c).join(" "))
                   return (
                     <li
-                      className={`
-                        cursor-pointer hover:bg-light-primary
+                      className={cn(`
+                        cursor-pointer
                         input-suggest
                         ${(key == activeOption || selected) && "bg-light-primary text-primary"}
-                      `}
+                      `, 
+                        pcn(className, "suggest-item"),
+                        !(key == activeOption || selected) && pcn(className, "suggest-item", "hover").split(" ").map((c) => "hover:" + c).join(" "),
+                        (key == activeOption || selected) && pcn<CT>(className, "suggest-item", "selected")
+                      )}
                       key={key}
                       onMouseDown={() => {
                         setKeydown(true);

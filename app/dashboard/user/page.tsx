@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense } from "react";
-import { HeadbarComponent, SelectComponent, TableSupervisionComponent } from "@components";
+import { CheckboxComponent, HeadbarComponent, InputComponent, SelectComponent, TableSupervisionComponent } from "@components";
 
 export default function UserPage() {
   return (
@@ -118,6 +118,19 @@ export default function UserPage() {
                   placeholder: "Masukkan alamat",
                 }
               },
+              {
+                type: "custom",
+                visibility: "update",
+                construction: ({formControl}) => {
+                  return (
+                    <div className="flex flex-col gap-4 mt-4">
+                        <CheckboxComponent checked={formControl("change_password")?.value == "1"} onChange={() => formControl("change_password").onChange(formControl("change_password")?.value == "1" ? "0" : "1")} name="change_password" label="Ubah Password" />
+
+                        {formControl("change_password")?.value == "1" && <InputComponent type="password" name="password" label="Password Baru" placeholder="Masukkan password baru" {...formControl} />}
+                    </div>
+                  )
+                }
+              }
             ]
           }}
           controlBar={["CREATE", "SEARCH"]}

@@ -3,16 +3,41 @@
 import Link from "next/link";
 import { useGetApi, conversion } from "@/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMobileAlt } from "@fortawesome/free-solid-svg-icons";
+import { faMobileAlt, faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { BookingStatusComponent } from "../../booking/_constructs/booking-status.construct";
 import { useMemo } from "react";
 
-export function RecentBookingListComponent() {
-  const params = useMemo(() => ({ expand: ["unit", "unit.unit_category"], paginate: 5 }), []);
+interface TodayBookingListProps {
+  type   :  "pickup" | "return";
+  title  :  string;
+  icon   :  typeof faArrowDown;
+}
+
+export function TodayBookingListComponent({ type, title, icon }: TodayBookingListProps) {
+  const today = new Date().toISOString().slice(0, 10);
+  
+  const params = useMemo(() => ({
+    expand: ["unit", "unit.unit_category"], 
+    paginate: 10,
+    filter: [
+      ...(type === "pickup" 
+        ? [{ column: "status", type: "in" as any, value: ["ORDERED"] }] 
+        : [{ column: "status", type: "in" as any, value: ["RENTED"] }]
+      )
+    ]
+  }), [type]);
+
+  const includeParams = useMemo(() => ({
+    ...(type === "pickup" 
+      ? { start_at: today }
+      : { end_at: today }
+    )
+  }), [type, today]);
 
   const { data: responseBody, loading } = useGetApi({
     path: "bookings",
-    params
+    params,
+    includeParams
   });
 
   const bookings = responseBody?.data?.data || responseBody?.data || [];
@@ -20,17 +45,17 @@ export function RecentBookingListComponent() {
   return (
     <>
       <div className="flex items-center justify-between mb-4 mt-8">
-        <h2 className="text-base font-bold">Pesanan Terbaru</h2>
-        <Link href="/dashboard/booking" className="text-xs font-semibold text-primary">
-          Lihat Semua
-        </Link>
+        <div className="flex items-center gap-2">
+          <FontAwesomeIcon icon={icon} className={`text-sm ${type === "pickup" ? "text-primary" : "text-warning"}`} />
+          <h2 className="text-base font-bold">{title}</h2>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2 mb-6">
+      <div className="flex flex-col gap-2 mb-2">
         {loading ? (
           <div className="text-center text-sm text-gray-500 py-4">Memuat data...</div>
         ) : bookings.length === 0 ? (
-          <div className="text-center text-sm text-gray-500 py-4">Belum ada pesanan</div>
+          <div className="text-center text-sm text-gray-500 py-4 bg-white rounded-lg border">Tidak ada pesanan</div>
         ) : (
           <div className="flex flex-col gap-2 w-full">
             {bookings.slice(0, 5).map((row: any, i: number) => (
@@ -65,10 +90,6 @@ export function RecentBookingListComponent() {
                           </div>
                         )}
                       </div>
-                    </div>
-                    <div className="px-2 py-2 border-t">
-                      <p className="text-xs font-semibold">{row.total ? conversion.currency(row.total || 0) : "-"}</p>
-                      <p className="text-[10px]">Terbayar: <span className="font-semibold">{row.total ? conversion.currency(row.total_paid || 0) : "-"}</span></p>
                     </div>
                   </div>
                 </div>

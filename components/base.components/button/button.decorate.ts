@@ -2,7 +2,7 @@ export const buttonContainer = {
   lg: "px-14 py-3 flex items-center gap-3",
   md: "px-8 py-2 flex items-center gap-2",
   sm: "px-6 py-2 text-xs flex items-center gap-2",
-  xs: "px-3 py-1 text-[10px] flex items-center gap-1.5",
+  xs: "px-4 py-1 text-xs flex items-center gap-1.5",
 };
 
 export const iconButtonContainer = {

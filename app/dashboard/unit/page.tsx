@@ -11,8 +11,8 @@ import moment from "moment";
 export default function ProductPage() {
   const { user } = useAuthContext();
 
-  const [dateStart, setDateStart] = useState(moment().format("YYYY-MM-DD"));
-  const [dateEnd, setDateEnd] = useState(moment().format("YYYY-MM-DD"));
+  const [dateStart, setDateStart] = useState(moment().format("YYYY-MM-DDTHH:mm"));
+  const [dateEnd, setDateEnd] = useState(moment().format("YYYY-MM-DDTHH:mm"));
   const [filterCategory, setFilterCategory] = useState<any[]>([]);
   const [filterOutlet, setFilterOutlet] = useState<any[]>([]);
 
@@ -45,6 +45,11 @@ export default function ProductPage() {
               selector: "unit_category_id",
               label: "Jenis Unit",
               item: (r) => r.unit_category?.name || "-",
+            },
+            {
+              selector: "description",
+              label: "Deskripsi",
+              item: (r) => r.description || "-",
             },
           ]}
           formControl={{
@@ -92,6 +97,9 @@ export default function ProductPage() {
                     </div>
                     <div className="px-4 py-4">
                       <UnitCategoryCardComponent data={row.unit_category} />
+                      {row.description && (
+                        <p className="text-xs text-light-foreground mt-2 px-1">{row.description}</p>
+                      )}
                     </div>
                   </div>
                 );
@@ -117,21 +125,21 @@ const FilterUnit = ({ dateStart, dateEnd, setDateStart, setDateEnd, setFilterCat
           <p className="text-sm mb-2">Ketersediaan Unit</p>
           <div className="flex flex-col gap-2 p-2 border rounded-lg">
             <InputComponent
-              type="date"
+              type="datetime-local"
               label={"Dari"}
               name="_start_date"
               value={dateStart}
               onChange={(v) => setDateStart(v)}
-              placeholder="YYYY-MM-DD"
+              placeholder="YYYY-MM-DDTHH:mm"
               className="md:py-1.5 md:text-sm"
             />
             <InputComponent
-              type="date"
+              type="datetime-local"
               label={"Sampai"}
               name="_end_date"
               value={dateEnd}
               onChange={(v) => setDateEnd(v)}
-              placeholder="YYYY-MM-DD"
+              placeholder="YYYY-MM-DDTHH:mm"
               className="md:py-1.5 md:text-sm"
             />
           </div>

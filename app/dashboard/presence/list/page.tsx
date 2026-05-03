@@ -1,10 +1,14 @@
 "use client"
 
-import { Suspense } from "react";
-import { HeadbarComponent, TableSupervisionComponent } from "@components";
-import { conversion } from "@/utils";
+import { Suspense, useState } from "react";
+import { HeadbarComponent, InputCheckboxComponent, InputComponent, TableSupervisionComponent } from "@components";
+import { conversion, useResponsive } from "@/utils";
 
-export default function PresencePage() {
+export default function PresenceListPage() {
+  const [dateStart, setDateStart] = useState<string | null>(null);
+  const [dateEnd, setDateEnd] = useState<string | null>(null);
+  const [filterUser, setFilterUser] = useState<any[]>([]);
+
   return (
     <Suspense>
       <div className="px-2">
@@ -13,7 +17,14 @@ export default function PresencePage() {
         <TableSupervisionComponent
           fetchControl={{
             path: "presences",
-            params: { expand: ["user"] },
+            params: { 
+              expand: ["user"],
+              filter: [
+                ...(dateStart ? [{ column: "date", type: "gte", value: dateStart }] : []),
+                ...(dateEnd ? [{ column: "date", type: "lte", value: dateEnd }] : []),
+                ...(filterUser?.length > 0 ? [{ column: "user_id", type: "in", value: filterUser }] : []),
+              ] as any[]
+            },
           }}
           columnControl={[
             {
@@ -87,7 +98,7 @@ export default function PresencePage() {
               },
             ]
           }}
-          controlBar={["CREATE", "SEARCH"]}
+          controlBar={["CREATE", "SEARCH", <FilterPresence key="filter-presence" dateStart={dateStart} dateEnd={dateEnd} setDateStart={setDateStart} setDateEnd={setDateEnd} filterUser={filterUser} setFilterUser={setFilterUser} />]}
           detailControl={(row) => {
             const storageHost = process.env.NEXT_PUBLIC_STORAGE_HOST;
             const checkInImageUrl  = row?.check_in_image  ? `${storageHost}${row.check_in_image}`  : null;
@@ -225,4 +236,50 @@ export default function PresencePage() {
       </div>
     </Suspense>
   );
+}
+
+
+const FilterPresence = ({ dateStart, dateEnd, setDateStart, setDateEnd, filterUser, setFilterUser }: any) => {
+  const { isSm } = useResponsive();
+
+  if(isSm) {
+    return (
+      <>
+        <div className="px-2 pb-20 w-full">
+          <p className="text-sm mb-2 font-semibold">Rentang Tanggal</p>
+          <div className="flex flex-col gap-2 p-2 border rounded-lg mb-4">
+            <InputComponent
+              type="date"
+              label={"Dari"}
+              name="_start_date"
+              value={dateStart}
+              onChange={(v) => setDateStart(v)}
+              placeholder="YYYY-MM-DD"
+              className="md:py-1.5 md:text-sm"
+            />
+            <InputComponent
+              type="date"
+              label={"Sampai"}
+              name="_end_date"
+              value={dateEnd}
+              onChange={(v) => setDateEnd(v)}
+              placeholder="YYYY-MM-DD"
+              className="md:py-1.5 md:text-sm"
+            />
+          </div>
+
+          <InputCheckboxComponent
+            label="Karyawan"
+            name="_filter_user"
+            serverOptionControl={{ path: "users", params: {selectableOption: ["id", "name"]} }}
+            vertical
+            onChange={(v) => setFilterUser(v)}
+            className="max-h-[300px] label::mt-4"
+          />
+        </div>
+      </>
+    ) 
+  } else {
+    return <></>;
+  }
 }

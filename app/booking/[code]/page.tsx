@@ -1,25 +1,28 @@
 "use client"
 
 import { useEffect, useState, use } from "react";
-import { api, conversion } from "@utils";
+import { api, conversion, useGetApi } from "@utils";
 import { FormSupervisionComponent } from "@components";
 import { BookingDetailComponent } from "./_structures/BookingDetail.component";
 import { CustomerUnitListSelectorComponent } from "./_constructs/UnitListSelector.construct";
 import { InputBookingComponent } from "./_constructs/InputBooking.component";
+import { SelectBookingComponent } from "./_constructs/SelectBooking.component";
 
-const statusColor = {
+const statusColor: Record<string, string> = {
   DRAFT     :  "bg-slate-100 text-slate-600",
   ORDERED   :  "bg-cyan-100 text-cyan-600",
   RENTED    :  "bg-blue-100 text-primary",
-  RETURNED  :  "bg-green-100 text-success",
+  RETURNED  :  "bg-orange-100 text-orange-600",
+  DONE      :  "bg-green-100 text-success",
   CANCELED  :  "bg-red-100 text-danger",
 }
 
-const statusLabel = {
+const statusLabel: Record<string, string> = {
   DRAFT     :  "DIBUAT",
   ORDERED   :  "DIPESAN",
   RENTED    :  "DISEWA",
-  RETURNED  :  "SELESAI",
+  RETURNED  :  "DIKEMBALIKAN",
+  DONE      :  "SELESAI",
   CANCELED  :  "DIBATALKAN",
 }
 
@@ -45,6 +48,11 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
     }
     setLoading(false);
   };
+
+  const { data: outletsData } = useGetApi({
+    path: "customer-booking-outlets",
+  });
+  const outletOptions = (outletsData?.data?.data || outletsData?.data || []).map((o: any) => ({ value: o.id, label: o.name }));
 
   useEffect(() => {
     fetchBooking();
@@ -142,8 +150,8 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
             <div className="relative mb-6">
               <div className="absolute w-full h-full bg-black top-2 left-2 z-10"></div>
               <div className="absolute -top-1 -left-2 bg-white border-2 px-1 py-0.5 !border-black -rotate-5 text-[#ff2d78] font-bold text-xs uppercase tracking-widest z-30">Status</div>
-              <div className={`${statusColor[(booking?.status || "DRAFT") as keyof typeof statusColor]} border-4 !border-black p-4 relative z-20 font-extrabold uppercase tracking-widest`}>
-                {statusLabel[(booking?.status || "DRAFT") as keyof typeof statusLabel]}
+              <div className={`${statusColor[booking?.status || "DRAFT"] || "bg-slate-100 text-slate-600"} border-4 !border-black p-4 relative z-20 font-extrabold uppercase tracking-widest`}>
+                {statusLabel[booking?.status || "DRAFT"] || booking?.status}
               </div>
             </div>
           </>
@@ -215,8 +223,8 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
                       col: 12,
                       type: "custom",
                       construction: ({ formControl }) => <InputBookingComponent 
-                        name="customer_namer" 
-                        label="Nama" 
+                        name="customer_name" 
+                        label="Nama Lengkap" 
                         placeholder="Masukkan nama lengkap..."
                         {...formControl("customer_name")} 
                       />
@@ -226,7 +234,7 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
                       type: "custom",
                       construction: ({ formControl }) => <InputBookingComponent 
                         name="customer_contact" 
-                        label="Kontak Pemesan (WA)" 
+                        label="Nomor HP (WA)" 
                         placeholder="08xxxxxxxxxx"
                         {...formControl("customer_contact")} 
                       />
@@ -263,8 +271,8 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
                         if (!startAt || !endAt) {
                           return (
                             <div className="pb-2">
-                              <label className="font-bold uppercase tracking-wider text-black">
-                                PILIH IPHONE
+                              <label className="font-bold uppercase tracking-wider text-black text-[12px]">
+                                PILIH IPHONE <span className="text-danger">*</span>
                               </label>
                               <div
                                 className="mt-2 p-4 border-2 !border-black bg-[#fffbf0] text-center"
@@ -290,6 +298,111 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
                           </div>
                         );
                       }
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        name="customer_address" 
+                        label="Alamat Lengkap" 
+                        placeholder="Masukkan alamat lengkap..."
+                        {...formControl("customer_address")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        name="customer_mother_name" 
+                        label="Nama Ibu" 
+                        placeholder="Masukkan nama ibu..."
+                        {...formControl("customer_mother_name")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        name="customer_father_name" 
+                        label="Nama Ayah" 
+                        placeholder="Masukkan nama ayah..."
+                        {...formControl("customer_father_name")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        name="customer_phone" 
+                        label="No HP (Ayah/Ibu/Saudara)" 
+                        placeholder="08xxxxxxxxxx"
+                        {...formControl("customer_phone")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        name="customer_email" 
+                        label="Email" 
+                        placeholder="Masukkan email..."
+                        {...formControl("customer_email")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        name="customer_social_media" 
+                        label="IG/FB" 
+                        placeholder="Username IG atau FB"
+                        {...formControl("customer_social_media")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <SelectBookingComponent 
+                        name="pickup_outlet_id" 
+                        label="Lokasi Ambil (Cabang)" 
+                        placeholder="Pilih cabang"
+                        options={outletOptions}
+                        {...formControl("pickup_outlet_id")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        type="file"
+                        name="customer_id_image" 
+                        label="Foto KTP/SIM/KP" 
+                        placeholder="Pilih file"
+                        {...formControl("customer_id_image")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        type="file"
+                        name="customer_kk_image" 
+                        label="Foto KK" 
+                        placeholder="Pilih file"
+                        {...formControl("customer_kk_image")} 
+                      />
+                    },
+                    {
+                      col: 12,
+                      type: "custom",
+                      construction: ({ formControl }) => <InputBookingComponent 
+                        type="file"
+                        name="customer_payment_proof_image" 
+                        label="Foto Bukti DP/Lunas" 
+                        placeholder="Pilih file"
+                        tip="List metode pembayaran ada di bawah!"
+                        {...formControl("customer_payment_proof_image")} 
+                      />
                     },
                     {
                       col: 12,
@@ -330,6 +443,10 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
           </div>
         </div>
 
+        <div className="mt-6">
+          <TermsAndPaymentInfo />
+        </div>
+
         <div className="mt-16">
           <div className="text-center pb-2 mt-12">
             <p className="text-[11px] font-semibold text-black text-on-surface-variant uppercase tracking-wider">
@@ -341,6 +458,62 @@ export default function PublicBookingPage({ params }: { params: Promise<{ code: 
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+
+// ==============================>
+// ## S&K and Payment Info
+// ==============================>
+function TermsAndPaymentInfo() {
+  const { data: settingsData } = useGetApi({
+    path: "customer-booking-settings",
+    params: { key: "terms_and_conditions" } as any
+  });
+
+  const { data: paymentData } = useGetApi({
+    path: "customer-booking-payment-methods",
+  });
+
+  const termsContent     =  settingsData?.data?.terms_and_conditions || "";
+  const paymentMethods   =  paymentData?.data?.data || paymentData?.data || [];
+
+  if (!termsContent && paymentMethods.length === 0) return null;
+
+  return (
+    <div className="mb-6">
+      {termsContent && (
+        <div className="relative">
+          <div className="absolute w-full h-full bg-black top-2 left-2 z-10"></div>
+          <div className="bg-[#f5f0e8] border-4 !border-black p-4 mb-4 z-20 relative">
+            <h3 className="font-extrabold uppercase tracking-wider text-black text-sm mb-2 border-b-2 border-dashed !border-black pb-2">
+              Syarat & Ketentuan
+            </h3>
+            <div className="text-sm text-black whitespace-pre-line leading-relaxed">
+              {termsContent}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {paymentMethods.length > 0 && (
+        <div className="bg-[#f5f0e8] border-4 !border-black p-4">
+          <h3 className="font-extrabold uppercase tracking-wider text-black text-sm mb-3 border-b-2 border-dashed !border-black pb-2">
+            Metode Pembayaran
+          </h3>
+          <div className="flex flex-col gap-3">
+            {paymentMethods.filter((pm: any) => pm.id != 1).map((pm: any, i: number) => (
+              <div key={i} className="bg-white border-2 !border-black border-b-4 border-r-4 px-4 py-3">
+                <p className="font-bold text-sm text-black uppercase">{pm.name || pm.type}</p>
+                {pm.description && (
+                  <p className="text-sm font-mono font-bold text-[#ff2d78] mt-0.5">{pm.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,12 +4,13 @@ import { Suspense, useState } from "react";
 import { HeadbarComponent, IconButtonComponent, TableSupervisionComponent, ModalConfirmComponent, BottomSheetComponent, ButtonComponent, InputComponent, ToastComponent, InputCheckboxComponent } from "@components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UnitListSelectorComponent } from "./_constructs/UnitListSelector.construct";
-import { faCopy, faLink, faMobileAlt } from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faFileExcel, faLink, faMobileAlt } from "@fortawesome/free-solid-svg-icons";
 import { BookingStatusComponent } from "./_constructs/booking-status.construct";
 import { conversion, api, useResponsive } from "@/utils";
 import Link from "next/link";
 import { useAuthContext } from "@/contexts";
 import { useRouter } from "next/navigation";
+import { exportBookingToExcel } from "./_services/export-booking.service";
 
 
 
@@ -20,6 +21,7 @@ export default function BookingPage() {
   const [createdLink, setCreatedLink]  =  useState("");
   const [loadingLink, setLoadingLink]  =  useState(false);
   const [showToast, setShowToast]      =  useState(false);
+  const [exporting, setExporting]      =  useState(false);
 
 
 
@@ -27,6 +29,7 @@ export default function BookingPage() {
   const [dateEnd, setDateEnd] = useState(null);
   const [filterCategory, setFilterCategory] = useState<any[]>([]);
   const [filterOutlet, setFilterOutlet] = useState<any[]>([]);
+  const [filterStatus, setFilterStatus] = useState<any[]>([]);
 
 
 
@@ -57,10 +60,47 @@ export default function BookingPage() {
     setLoadingLink(false);
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await api({
+        path: "bookings",
+        params: {
+          expand: ["unit", "unit.unit_category"],
+          paginate: 99999,
+          filter: [
+            ...(filterOutlet?.length > 0 ? [{ column: "outlet_id", type: "in", value: filterOutlet }] : []),
+            ...(filterStatus?.length > 0 ? [{ column: "status", type: "in", value: filterStatus }] : []),
+          ] as any[]
+        },
+        includeParams: {
+          ...(dateStart && dateEnd ? { booking_at: `${dateStart}|${dateEnd}` } : {}),
+          ...(filterCategory?.length > 0 ? { unit_category_id: filterCategory.join(",") } : [])
+        }
+      });
+      const bookings = res?.data?.data?.data || res?.data?.data || [];
+      await exportBookingToExcel({ bookings, dateStart: dateStart || undefined, dateEnd: dateEnd || undefined });
+    } catch {}
+    setExporting(false);
+  };
+
   return (
     <Suspense>
       <div className="px-2">
-        <HeadbarComponent title="Pesanan" noBtnBack />
+        <HeadbarComponent 
+          title="Pesanan" 
+          noBtnBack 
+          rightContent={(
+          <ButtonComponent
+            icon={faFileExcel}
+            size="xs"
+            label="Export Excel"
+            variant="outline"
+            paint="secondary"
+            rounded
+            onClick={handleExport}
+          />
+        )} />
 
         <TableSupervisionComponent
           fetchControl={{
@@ -68,7 +108,8 @@ export default function BookingPage() {
             params: {
               expand: ["unit", "unit.unit_category"],
               filter: [
-                ...(filterOutlet?.length > 0 ? [{ column: "outlet_id", type: "in", value: filterOutlet }] : [])
+                ...(filterOutlet?.length > 0 ? [{ column: "outlet_id", type: "in", value: filterOutlet }] : []),
+                ...(filterStatus?.length > 0 ? [{ column: "status", type: "in", value: filterStatus }] : []),
               ] as any[]
             },
             includeParams: {
@@ -130,8 +171,8 @@ export default function BookingPage() {
               {
                 construction: {
                   name         :  "customer_contact",
-                  label        :  "Kontak Pemesan",
-                  placeholder  :  "Masukkan nomor HP / email",
+                  label        :  "Nomor HP",
+                  placeholder  :  "Masukkan nomor HP",
                   validations  :  ["required", "max:200"]
                 }
               },
@@ -186,13 +227,93 @@ export default function BookingPage() {
                   );
                 }
               },
+              {
+                col: 12,
+                construction: {
+                  name         :  "customer_address",
+                  label        :  "Alamat Lengkap",
+                  placeholder  :  "Masukkan alamat lengkap",
+                }
+              },
+              {
+                construction: {
+                  name         :  "customer_mother_name",
+                  label        :  "Nama Ibu",
+                  placeholder  :  "Masukkan nama ibu",
+                }
+              },
+              {
+                construction: {
+                  name         :  "customer_father_name",
+                  label        :  "Nama Ayah",
+                  placeholder  :  "Masukkan nama ayah",
+                }
+              },
+              {
+                construction: {
+                  name         :  "customer_phone",
+                  label        :  "No HP (Ayah/Ibu/Saudara)",
+                  placeholder  :  "08xxxxxxxxxx",
+                }
+              },
+              {
+                construction: {
+                  name         :  "customer_email",
+                  label        :  "Email",
+                  placeholder  :  "Masukkan email",
+                }
+              },
+              {
+                construction: {
+                  name         :  "customer_social_media",
+                  label        :  "IG/FB",
+                  placeholder  :  "Username IG atau FB",
+                }
+              },
+              {
+                type: "select",
+                construction: {
+                  name                 :  "pickup_outlet_id",
+                  label                :  "Lokasi Ambil (Cabang)",
+                  placeholder          :  "Pilih cabang",
+                  serverOptionControl  :  {path: "outlets", params: {selectableOption: ["id", "name"]}},
+                }
+              },
+              {
+                col: 12,
+                construction: {
+                  type         :  "file",
+                  name         :  "customer_id_image",
+                  label        :  "Foto KTP/SIM/KP",
+                  placeholder  :  "Pilih file",
+                }
+              },
+              {
+                col: 12,
+                construction: {
+                  type         :  "file",
+                  name         :  "customer_kk_image",
+                  label        :  "Foto KK",
+                  placeholder  :  "Pilih file",
+                }
+              },
+              {
+                col: 12,
+                construction: {
+                  type         :  "file",
+                  name         :  "customer_payment_proof_image",
+                  label        :  "Foto Bukti DP/Lunas",
+                  placeholder  :  "Pilih file",
+                }
+              },
             ]
           }}
           controlBar={[
             "CREATE",
             "SEARCH",
+            <ButtonComponent key="export" icon={faFileExcel} label={exporting ? "Mengekspor..." : "Export"} size="sm" className="hidden md:flex" variant="outline" onClick={handleExport} loading={exporting} />,
             <ButtonComponent key="link" icon={faLink} label="Buat Link" size="sm" className="hidden md:flex" variant="outline" />,
-            <FilterUnit key="filter-unit" dateStart={dateStart} dateEnd={dateEnd} setDateStart={setDateStart} setDateEnd={setDateEnd} setFilterCategory={setFilterCategory} setFilterOutlet={setFilterOutlet} />]}
+            <FilterUnit key="filter-unit" dateStart={dateStart} dateEnd={dateEnd} setDateStart={setDateStart} setDateEnd={setDateEnd} setFilterCategory={setFilterCategory} setFilterOutlet={setFilterOutlet} filterStatus={filterStatus} setFilterStatus={setFilterStatus} />]}
           detailControl={false}
           onRowClick={(row) => {
             router.push(`/dashboard/booking/${row.id}`);
@@ -317,7 +438,16 @@ export default function BookingPage() {
 
 
 
-const FilterUnit = ({ dateStart, dateEnd, setDateStart, setDateEnd, setFilterCategory, setFilterOutlet }: any) => {
+const STATUS_OPTIONS = [
+  { value: "DRAFT", label: "Dibuat" },
+  { value: "ORDERED", label: "Dipesan" },
+  { value: "RENTED", label: "Disewa" },
+  { value: "RETURNED", label: "Dikembalikan" },
+  { value: "DONE", label: "Selesai" },
+  { value: "CANCELED", label: "Dibatalkan" },
+];
+
+const FilterUnit = ({ dateStart, dateEnd, setDateStart, setDateEnd, setFilterCategory, setFilterOutlet, filterStatus, setFilterStatus }: any) => {
   const { isSm } = useResponsive();
   const { user } = useAuthContext();
 
@@ -325,7 +455,7 @@ const FilterUnit = ({ dateStart, dateEnd, setDateStart, setDateEnd, setFilterCat
     return (
       <>
         <div className="px-2 pb-20 w-full">
-          <p className="text-sm mb-2">Ketersediaan Unit</p>
+          <p className="text-sm mb-2">Tanggal</p>
           <div className="flex flex-col gap-2 p-2 border rounded-lg">
             <InputComponent
               type="date"
@@ -345,6 +475,28 @@ const FilterUnit = ({ dateStart, dateEnd, setDateStart, setDateEnd, setFilterCat
               placeholder="YYYY-MM-DD"
               className="md:py-1.5 md:text-sm"
             />
+          </div>
+          <p className="input-label mt-4">Status</p>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {STATUS_OPTIONS.map((s) => {
+              const isActive = filterStatus.includes(s.value);
+              return (
+                <button
+                  key={s.value}
+                  type="button"
+                  className={`text-xs px-3 py-1.5 rounded-full font-semibold border transition-colors ${isActive ? "bg-primary text-white border-primary" : "bg-white text-foreground border-gray-200"}`}
+                  onClick={() => {
+                    if (isActive) {
+                      setFilterStatus(filterStatus.filter((v: string) => v !== s.value));
+                    } else {
+                      setFilterStatus([...filterStatus, s.value]);
+                    }
+                  }}
+                >
+                  {s.label}
+                </button>
+              );
+            })}
           </div>
 
           <InputCheckboxComponent

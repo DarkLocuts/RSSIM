@@ -168,13 +168,13 @@ export function InputBookingComponent({
           )}
         >
           {label}
-          {validations && validation.hasRules(validations, "required") && <span className="text-danger">*</span>}
+          <span className="text-danger">*</span>
         </label>
 
         {tip && (
           <small
             className={cn(
-              "input-tip",
+              "input-tip -mt-1 text-gray-900",
               pcn<CT>(className, "tip"),
               props.disabled && "opacity-60",
               props.disabled && pcn<CT>(className, "tip", "disabled"),
@@ -189,7 +189,7 @@ export function InputBookingComponent({
             id={randomId}
             placeholder={!multiple || (multiple && !inputHandler.value?.length) ? props.placeholder : ""}
             className={cn(
-              "w-full py-3 px-4 bg-white border-2 border-b-4 border-r-4 !border-black focus:outline-none focus:!border-4 focus:!border-dotted focus:!border-[#ff2d78] !font-bold tracking-widest",
+              "w-full py-3 px-4 bg-white border-2 border-b-4 border-r-4 !border-black focus:outline-none focus:!border-4 focus:!border-dotted focus:!border-[#ff2d78] !font-bold tracking-widest file:bg-white",
               props.type == "file" && "input-file",
               props.type == "color" && "h-10 p-1 cursor-pointer",
               leftIcon && "pl-12",
